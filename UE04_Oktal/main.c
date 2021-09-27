@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 int power(int base, int power);
 
 int main () {
@@ -8,7 +7,7 @@ int main () {
     printf(": ");
     scanf("%3d", &oktNum);
     
-    /*get the rightmost digit, multiply it with (8 to the power of of i(=current position)),*/
+    /*get the rightmost digit, multiply it with (8 to the power of i(=current position)),*/
     /*add to dezNum*/
     for (int i = 0; oktNum > 0; i++) {
         dezNum += (oktNum % 10) * power(8, i);
@@ -24,9 +23,7 @@ int main () {
         /*truncate the rightmost digit*/
         dezNum /= 10;
     }
-    
     printf("ZS: %d\n", digSum);
-    
     return 0;
 }
 
