@@ -7,7 +7,8 @@ int main () {
     printf(": ");
     scanf("%3d", &oktNum);
     
-    /*get the rightmost digit, multiply it with (8 to the power of i(=current position)),*/
+    /*get the rightmost digit, multiply it with 
+     *(8 to the power of i(=current position)),*/
     /*add to dezNum*/
     for (int i = 0; oktNum > 0; i++) {
         dezNum += (oktNum % 10) * power(8, i);
