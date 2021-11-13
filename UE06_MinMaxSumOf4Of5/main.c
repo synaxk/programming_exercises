@@ -6,9 +6,8 @@ int main() {
     min = 9;
     printf(": ");
 
-    scanf("%d %d %d %d %d", nums, nums + 1, nums + 2, nums + 3, nums + 4);
-
     for (int i = 0; i < 5; i++) {
+    	scanf("%d", nums + i);
         if (nums[i] > max)
             max = nums[i];
         if (nums[i] < min)
