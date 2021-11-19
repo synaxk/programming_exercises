@@ -158,6 +158,7 @@ int div(int a, int b, char *option) {
     return result;
 }
 
+//
 int mul(int a, int b) {
     int result = 0;
     result = a * b;
