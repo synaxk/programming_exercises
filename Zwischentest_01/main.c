@@ -1,6 +1,15 @@
 #include <stdio.h>
 #include <string.h>
 
+
+void end ()  {
+    printf("\n___________.__                   __     _____.___.            ._.\n"
+           "\\__    ___/|  |__ _____    ____ |  | __ \\__  |   | ____  __ __| |\n"
+           "  |    |   |  |  \\\\__  \\  /    \\|  |/ /  /   |   |/  _ \\|  |  \\ |\n"
+           "  |    |   |   Y  \\/ __ \\|   |  \\    <   \\____   (  <_> )  |  /\\|\n"
+           "  |____|   |___|  (____  /___|  /__|_ \\  / ______|\\____/|____/ __\n"
+           "                \\/     \\/     \\/     \\/  \\/                    \\/");
+}
 /*Get Input*/
 int getNumber();
 
@@ -63,6 +72,8 @@ int main() {
     printf("\nFinal result: %d", result);
     printf("\nNumber of positive: %d", numberOfPositive);
     printf("\nNumber of negative: %d", numberOfNegative);
+
+    end();
     return 0;
 }
 

@@ -4,7 +4,7 @@
 
 #define TEXTLENGTH 1000
 
-char **scanWords();
+char** scanWords();
 int countWord(char *text, char *word);
 void freeAll(char **strings);
 void getInput(char *input);
@@ -18,9 +18,12 @@ int main() {
     printf("words:\n");
     words = scanWords();
 
+    for (int i = 0; words[i][0] != '\0' ;i++) {
+        countWord(text, words[i]);
+    }
+    freeAll(words);
     return 0;
 }
-
 
 char** scanWords() {
     char** words= ( char**)calloc(1, sizeof(char*)), **tmp;
@@ -49,4 +52,31 @@ void getInput(char *input) {
         input[i] = c;
     }
     input[++i] = '\0';
+}
+
+int countWord(char *text, char *word){
+    int textLength = strlen(text);
+    int wordLength = strlen(word);
+    int counter = 0;
+
+    for (int i = 0; i <= textLength; i++) {
+        for (int j = 0; text[i] == word[j] && j < wordLength; j++, i++) {
+            if (j == wordLength-1) {
+                counter++;
+                break;
+            }
+        }
+    }
+    printf("%s: %d\n", word, counter);
+    return counter;
+}
+
+void freeAll(char **strings) {
+    int i;
+
+    for (i = 0; strings[i][0] != '\0'; i++) {
+        free(strings[i]);
+    }
+    free(strings[i]);
+    free(strings);
 }
