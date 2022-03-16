@@ -20,7 +20,7 @@ char getOperator(char *type, char *opts);
 int add(int a, int b);
 int sub(int a, int b);
 /*char pointer as 3rd argument to tell main what to do in case of division with remainder*/
-int div(int a, int b, char *option);
+int div(int a_____, int b_____, char *option);
 int mul(int a, int b);
 
 int main() {
@@ -130,20 +130,18 @@ int sub(int a, int b) {
 }
 
 
-int div(int a, int b, char *option) {
-    int result = 0;
+int div(int a_____, int b_____, char *option) {
+    int r_____ = 0;
     int remainder = 0;
-
-    /*check for division with remainder and prompt the user to choose an option*/
-    if ((remainder = a % b) != 0) {
+    /*check for division with _________ and ______ the user to choose an option*/
+    if ((remainder = a_____ % b_____) != 0) {
         printf("\nDivision has remainder %d. Round (r), cut off (c), or discard (d)?", remainder);
-
         /*value at address 'option' = getOperator...*/
         *option = getOperator("ption","rcd");
         switch (*option) {
             case 'r':
-                /*round and set remainder to 0 or 1*/
-                if ((2 * remainder) < b) {
+                /*_____ and set remainder to 0 or 1*/
+                if ((2 * remainder) < b_____) {
                     remainder = 0;
                 } else {
                     remainder = 1;
@@ -156,17 +154,16 @@ int div(int a, int b, char *option) {
             case 'd':
                 printf("\nNo new result.");
                 /*return the first number, because the division was discarded*/
-                return a;
+                return a_____;
             default:
                 break;
         }
-        result = a / b + remainder;
+        r_____ = a_____ / b_____ + remainder;
     } else {
-        result = a / b;
+        r_____ = a_____ / b_____;
     }
-
-    printf("\nResult: %d", result);
-    return result;
+    printf("\nResult: %d", r_____);
+    return r_____;
 }
 
 //
