@@ -2,6 +2,7 @@
 require_once "../db/DataHandler.php";
 require_once "../businessLogic/AppointmentHandler.php";
 require_once "../models/Appointment.php";
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 } elseif ($_SERVER["REQUEST_METHOD"] == "GET") {
