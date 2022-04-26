@@ -4,8 +4,9 @@ require_once "../businessLogic/AppointmentHandler.php";
 require_once "../models/Appointment.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST["AppointmentID"])) {
+    if (isset($_POST["appointmentID"])) {
         //update
+        echo "TestPost";
     } else {
         //insert
     }

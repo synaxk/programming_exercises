@@ -29,6 +29,34 @@ class DataHandler {
         return $data;
     }
 
+    public function insert($data) {
+        $columns = "";
+        $values = "";
+        $valuePlaceHolder = "";
+        $paramPlaceHolder = "";
+        $i = 0;
+        foreach ($data as $key => $value) {
+            $i++;
+            $columns .= $key . ",";
+            $valuePlaceHolder .= "?,";
+            if (preg_match($key,'.*ID')) {
+                $paramPlaceHolder .= 'i';
+            } else {
+                $paramPlaceHolder .= 's';
+            }
+            $values .= "$value,";
+        }
+
+        $columns = rtrim($columns, ',');
+        $valuePlaceHolder = rtrim($valuePlaceHolder, ',');
+        $values = rtrim($values, ',');
+
+        $query = "INSERT INTO $this->table ($columns) VALUES ($valuePlaceHolder) ";
+        $query = $this->sqlConnection->prepare($query);
+        $query->bind_param("$paramPlaceHolder", $values);
+        $query->execute();
+    }
+
     public function update($whereClause, $key, $value) {
         $query = "UPDATE $this->table SET $key='$value' WHERE $whereClause";
         $query = $this->sqlConnection->prepare($query);
