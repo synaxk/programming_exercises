@@ -51,16 +51,15 @@ function submitVote($appointmentID){
         "dateID": $("input[name='vote']:checked").val()
     }
     $.ajax({
-        url:"../backend/controller/AppointmentController.php", //url fehlt
+        url:"../backend/controller/VoteController.php", //url fehlt
         type: "POST",
         dataType: "json",
         data: JSON.stringify(voteInput),
-        contentType: "json",
         success: function(response) {
             console.log("jhljh"+voteInput);
         },
         error: function(e){
-            console.log("error");
+            console.log(this.data);
         }
     });
 }
