@@ -3,7 +3,7 @@ $(window).on("load", () => {
     getAppointments();
     $("#details").hide();
     $("#addDate").click(addDateOption);
-   // $("#dates").hide()
+    $("#dates").hide()
 });
 
 
@@ -29,18 +29,19 @@ function getAppointment($appointmentID) {
         dataType: "json",
         success: function (response) {
             //show detail div, and load appointment details into fields;
-            //hide list?
-            $("#list").hide();
-            $("#details").append("<p><strong>Title:</strong>:  </p><p><strong>Location</strong></p><p><strong>Vote until: </strong></p>" );
+           console.log(response);
+            $("#details").append("<p><strong>"+ response.title+"  </strong></p><p>"+response.location+"</p><p>Vote until: "+response.dueDate+"</p>" );
+            response.date.forEach((item, index) => $("#vote_options").append("<input> type='radio' name='vote' id=date'"+ item.dateID +"' value='" + item.dateID+ "'><label for=date'"+ item.dateID +"'>" +item.startDate+ " - "+ item.endDate+"</label><br>");
             $("#details").show();
+
         }
     })
 }
 
 function addItemToList(item) {
     console.log(item);
-    $("#list").append("<p id="+item.AppointmentID+"><p><h5>" + item.Title +  "</h5></p><p>"+item.Location+"</p><p>Vote until: "+item.DueDate+"</p></p>");
-    $("#"+item.AppointmentID).click(()=> getAppointment(item.AppointmentID));
+    $("#list").append("<p><p><h5 onclick='getAppointment("+item.appointmentID+")'>" + item.title +  "</h5>" +
+        "</p><p>"+item.location+"</p><p>Vote until: "+item.dueDate+"</p></p>");
 
 }
 

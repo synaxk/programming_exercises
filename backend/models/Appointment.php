@@ -60,13 +60,13 @@ class Appointment {
     }
 
     public function getData() {
-        return ['AppointmentID' => $this->appointmentID,
-                'Title' => $this->title,
-                'Location' => $this->location,
-                'DueDate' => $this->dueDate,
-                'Dates' => $this->dates,
-                'Votes' => $this->votes,
-                'Comments' => $this->comments
+        return ['appointmentID' => $this->appointmentID,
+                'title' => $this->title,
+                'location' => $this->location,
+                'dueDate' => $this->dueDate,
+                'dates' => $this->dates,
+                'votes' => $this->votes,
+                'comments' => $this->comments
             ];
     }
 
