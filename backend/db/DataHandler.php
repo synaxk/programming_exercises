@@ -5,7 +5,11 @@ class DataHandler {
     private $table;
 
     public function __construct($table) {
-        $this->sqlConnection = new mysqli("localhost", "svc_hoteldb","MyPassword!","AppointmentFinder");
+        $this->sqlConnection = new mysqli("localhost", "svc_appointmentfinder","MyPassword!","appointmentfinder");
+        $this->table = $table;
+    }
+
+    public function changeTable($table) {
         $this->table = $table;
     }
 
@@ -25,8 +29,14 @@ class DataHandler {
         return $data;
     }
 
-    public function changeTable($table) {
-        $this->table = $table;
+    public function update($whereClause, $key, $value) {
+        $query = "UPDATE $this->table SET $key='$value' WHERE $whereClause";
+        $query = $this->sqlConnection->prepare($query);
+        $query->execute();
+    }
+
+    public function delete($whereClause) {
+        $query = "DELETE $this->table WHERE $whereClause";
     }
 
 }

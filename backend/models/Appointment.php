@@ -59,6 +59,17 @@ class Appointment {
         $this->votes = $votes;
     }
 
+    public function getData() {
+        return ['AppointmentID' => $this->appointmentID,
+                'Title' => $this->title,
+                'Location' => $this->location,
+                'DueDate' => $this->dueDate,
+                'Dates' => $this->dates,
+                'Votes' => $this->votes,
+                'Comments' => $this->comments
+            ];
+    }
+
 
 
 

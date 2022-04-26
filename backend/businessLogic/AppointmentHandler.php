@@ -11,25 +11,25 @@ class AppointmentHandler
 
 
     public function getAppointments() {
-        $dh = new DataHandler('Appointment');
+        $dh = new DataHandler('appointment');
         return $dh->selectAll();
     }
 
     public function getAppointmentDetails($appointmentID) {
-        $dh = new DataHandler('Appointment');
-        $data = $dh->selectAll("AppointmentID='" . $appointmentID . "'");
-        $appointment = new Appointment($data['AppointmentID'], $data['Title'], $data['Location'], $data['DueDate']);
+        $dh = new DataHandler('appointment');
+        $data = $dh->selectAll("appointmentID='" . $appointmentID . "'");
+        $appointment = new Appointment($data['appointmentID'], $data['title'], $data['location'], $data['dueDate']);
 
-        $dh->changeTable('Date');
-        $dates = $dh->selectAll("AppointmentID='" . $appointmentID . "'");
+        $dh->changeTable('date');
+        $dates = $dh->selectAll("appointmentID='" . $appointmentID . "'");
         $appointment->setDates($dates);
 
-        $dh->changeTable('Vote');
-        $votes = $dh->selectAll("AppointmentID='" . $appointmentID . "'");
+        $dh->changeTable('vote');
+        $votes = $dh->selectAll("appointmentID='" . $appointmentID . "'");
         $appointment->setVotes($votes);
 
-        $dh->changeTable('Comment');
-        $comments = $dh->selectAll("AppointmentID='" . $appointmentID . "'");
+        $dh->changeTable('comment');
+        $comments = $dh->selectAll("appointmentID='" . $appointmentID . "'");
         $appointment->setComments($comments);
 
         return $appointment;
