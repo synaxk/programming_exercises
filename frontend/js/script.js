@@ -3,6 +3,7 @@ $(window).on("load", () => {
     getAppointments();
     $("#details").hide();
     $("#addDate").click(addDateOption);
+    $("#vote_submit").click(submitVote);
     $("#dates").hide()
 });
 
@@ -35,10 +36,33 @@ function getAppointment($appointmentID) {
             response.dates.forEach((item) => $("#vote_options").append("<input type='radio' name='vote' id=date'"
                 + item.dateID +"' value='"+ item.dateID+ "'><label for='date"+ item.dateID
                 +"'>" +item.startDate+ " - "+ item.endDate+"</label>"));
+            $("#details").append("<button onclick='submitVote("+$appointmentID+")'>Vote</button>");
             $("#details").show();
 
         }
     })
+}
+
+function submitVote($appointmentID){
+
+    let voteInput = {
+        "appointmentID": $appointmentID,
+        "user": $("#user").val(),
+        "dateID": $("input[name='vote']:checked").val()
+    }
+    $.ajax({
+        url:"../backend/controller/AppointmentController.php", //url fehlt
+        type: "POST",
+        dataType: "json",
+        data: JSON.stringify(voteInput),
+        contentType: "json",
+        success: function(response) {
+            console.log("jhljh"+voteInput);
+        },
+        error: function(e){
+            console.log("error");
+        }
+    });
 }
 
 function addItemToList(item) {
