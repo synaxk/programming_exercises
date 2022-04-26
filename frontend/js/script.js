@@ -30,8 +30,11 @@ function getAppointment($appointmentID) {
         success: function (response) {
             //show detail div, and load appointment details into fields;
            console.log(response);
-            $("#details").append("<p><strong>"+ response.title+"  </strong></p><p>"+response.location+"</p><p>Vote until: "+response.dueDate+"</p>" );
-            response.date.forEach((item, index) => $("#vote_options").append("<input> type='radio' name='vote' id=date'"+ item.dateID +"' value='" + item.dateID+ "'><label for=date'"+ item.dateID +"'>" +item.startDate+ " - "+ item.endDate+"</label><br>");
+            $("#details").append("<p><strong>"+ response.title+" </strong></p><p>"
+                +response.location+"</p><p>Vote until: "+response.dueDate+"</p>" );
+            response.dates.forEach((item) => $("#vote_options").append("<input type='radio' name='vote' id=date'"
+                + item.dateID +"' value='"+ item.dateID+ "'><label for='date"+ item.dateID
+                +"'>" +item.startDate+ " - "+ item.endDate+"</label>"));
             $("#details").show();
 
         }
