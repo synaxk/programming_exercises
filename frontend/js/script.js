@@ -22,6 +22,7 @@ function getAppointments() {
 }
 
 function getAppointment($appointmentID) {
+    $("#list").toggle(); //geändert /////////////
     console.log("Get AppointmentID")
     $.ajax({
         type: "GET",
@@ -31,7 +32,7 @@ function getAppointment($appointmentID) {
         success: function (response) {
             //show detail div, and load appointment details into fields;
            console.log(response);
-            $("#details").append("<p><strong>"+ response.title+" </strong></p><p>"
+            $("#details").prepend("<p><h4>"+ response.title+" </h4></p><p>" //geändert//////
                 +response.location+"</p><p>Vote until: "+response.dueDate+"</p>" );
             response.dates.forEach((item) => $("#vote_options").append("<input type='radio' name='vote' id=date'"
                 + item.dateID +"' value='"+ item.dateID+ "'><label for='date"+ item.dateID
@@ -78,13 +79,9 @@ function addDateOption() {
     console.log("something");
     $("#dateList").append("<p><button class='btn btn-outline-danger btn-sm' onclick='$(this).parent().remove()'>X</button>Date: "
         + $("#dateOption").val() + " Start Time: "+$("#startTime").val()+"</p>");
-};
-
-function removeDate(){
-    console.log(this);
-    $(this).remove();
 }
-//TO DO Remove
+
+
 
 $("#submitDates").on("click", function(){
     var listItems = $("#dateList").childNodes;
@@ -92,6 +89,9 @@ $("#submitDates").on("click", function(){
         console.log(listItems[child]);
     }
 });
+///////////////////
+//date options array :
+
 
 ////////////////////////////////////////////
 
