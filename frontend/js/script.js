@@ -1,15 +1,21 @@
 /**use window on load to wait for DOM elements to load*/
 $(window).on("load", () => {
-    getAppointments();
+    /**hide detail view on load*/
     $("#details").hide();
-    $("#addDate").click(addDateOption);
-    $("#vote_submit").click(submitVote);
-    $("#dates").hide()
+    $("#dates").hide();
+
+    /**load appointment list*/
+    getAppointments();
+
+    /**click .outside class to leave and clear the detail view*/
+    $(".outside").on("click", () => {
+        $("#details").hide().children().remove();
+        $("#list").show();
+    })
 });
 
-
+/**load appointment list from the api*/
 function getAppointments() {
-
     $.ajax({
         type: "GET",
         url: "../backend/controller/AppointmentController.php",
@@ -21,43 +27,37 @@ function getAppointments() {
     })
 }
 
-function getAppointment($appointmentID) {
+/**select specific appointment from api, hide the list and show details*/
+function getAppointment(appointmentID) {
     $("#list").toggle(); //geändert /////////////
     console.log("Get AppointmentID")
     $.ajax({
         type: "GET",
-        url: "../backend/controller/AppointmentController.php?id=" + $appointmentID,
+        url: "../backend/controller/AppointmentController.php?id=" + appointmentID,
         cache: "false",
         dataType: "json",
         success: function (response) {
-            //show detail div, and load appointment details into fields;
-           console.log(response);
-            $("#details").prepend("<p><h4>"+ response.title+" </h4></p><p>" //geändert//////
-                +response.location+"</p><p>Vote until: "+response.dueDate+"</p>" );
-            response.dates.forEach((item) => $("#vote_options").append("<input type='radio' name='vote' id=date'"
-                + item.dateID +"' value='"+ item.dateID+ "'><label for='date"+ item.dateID
-                +"'>" +item.startDate+ " - "+ item.endDate+"</label>"));
-            $("#details").append("<button onclick='submitVote("+$appointmentID+")'>Vote</button>");
-            $("#details").show();
-
+            createDetailView(response, appointmentID);
         }
     })
 }
 
+/**send vote request to api*/
 function submitVote($appointmentID){
-
     let voteInput = {
         "appointmentID": $appointmentID,
-        "user": $("#user").val(),
+        "username": $("#user").val(),
         "dateID": $("input[name='vote']:checked").val()
-    }
+    };
+
     $.ajax({
-        url:"../backend/controller/VoteController.php", //url fehlt
+        url:"../backend/controller/AppointmentController.php",
         type: "POST",
         dataType: "json",
-        data: JSON.stringify(voteInput),
+        data: voteInput,
         success: function(response) {
-            console.log("jhljh"+voteInput);
+            console.log(response);
+
         },
         error: function(e){
             console.log(this.data);
@@ -65,12 +65,33 @@ function submitVote($appointmentID){
     });
 }
 
+/**add appointments to the list*/
 function addItemToList(item) {
     console.log(item);
     $("#list").append("<p><p><h5 onclick='getAppointment("+item.appointmentID+")'>" + item.title +  "</h5>" +
         "</p><p>"+item.location+"</p><p>Vote until: "+item.dueDate+"</p></p>");
 
 }
+
+/**create appointment-details view with date options and comments*/
+function createDetailView(item, appointmentID) {
+    console.log(item);
+    /**create detail view of appointment*/
+    $("#details").prepend("<h4>"+ item.title+" </h4><p>"+item.location+"</p>" +
+        "<p>Vote until: "+item.dueDate+"</p><div id='vote_options' ><h6>Please choose a date</h6></div>" +
+        "<label for='user'>Username:</label><br><input id='user' type='text'/>" +
+        "<button onclick='submitVote("+appointmentID+")'>Vote</button>" +
+        "<div id='comments'>Comments:</div>").show();
+
+    /**add date options*/
+    item.dates.forEach((date) => $("#vote_options").append("<input type='radio' name='vote' id=date'"
+        + date.dateID +"' value='"+ date.dateID+ "'><label for='date"+ date.dateID
+        +"'>" +date.startDate+ " - "+ date.endDate+"</label><br>"));
+
+    /**add comments*/
+    item.comments.forEach((comment) => $("#comments").append("<div>"+ comment.username +": "+ comment.text +"</div>"));
+}
+
 
 //////////////////////////////////////////////
 //when creating a new appointment -> add as many date options as you like

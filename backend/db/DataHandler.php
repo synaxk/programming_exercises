@@ -31,29 +31,27 @@ class DataHandler {
 
     public function insert($data) {
         $columns = "";
-        $values = "";
+        $values = [];
         $valuePlaceHolder = "";
         $paramPlaceHolder = "";
         $i = 0;
         foreach ($data as $key => $value) {
-            $i++;
             $columns .= $key . ",";
             $valuePlaceHolder .= "?,";
-            if (preg_match($key,'.*ID')) {
+            if (preg_match('/.*ID/',$key)) {
                 $paramPlaceHolder .= 'i';
             } else {
                 $paramPlaceHolder .= 's';
             }
-            $values .= "$value,";
+            $values[$i++] = $value;
         }
 
         $columns = rtrim($columns, ',');
         $valuePlaceHolder = rtrim($valuePlaceHolder, ',');
-        $values = rtrim($values, ',');
 
         $query = "INSERT INTO $this->table ($columns) VALUES ($valuePlaceHolder) ";
         $query = $this->sqlConnection->prepare($query);
-        $query->bind_param("$paramPlaceHolder", $values);
+        $query->bind_param("$paramPlaceHolder", ...$values);
         $query->execute();
     }
 

@@ -1,11 +1,9 @@
 <?php
 
-class AppointmentHandler
-{
+class AppointmentHandler {
     private $appointments;
 
-    public function __construct()
-    {
+    public function __construct() {
 
     }
 
@@ -31,7 +29,21 @@ class AppointmentHandler
         $dh->changeTable('comment');
         $comments = $dh->selectAll("appointmentID='" . $appointmentID . "'");
         $appointment->setComments($comments);
-
         return $appointment;
+    }
+
+    public function createAppointment($data) {
+        $dh = new DataHandler('appointment');
+        $dh->insert();
+    }
+
+    public function vote($data) {
+        $dh = new DataHandler('vote');
+        $dh->insert($data);
+    }
+
+    public function comment($data) {
+        $dh = new DataHandler('comment');
+        $dh->insert($data);
     }
 }
