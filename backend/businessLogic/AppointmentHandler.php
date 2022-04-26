@@ -33,7 +33,16 @@ class AppointmentHandler {
     }
 
     public function createAppointment($data) {
+        $appointment = new Appointment($data['title'], $data['location'], $data['dueDate']);
+
+        $dates = $data['dates'];
+        $votes = $data['votes'];
+        $comments = $data['comments'];
+
+        //todo: store appointment -> get new appointment id
+        // store relations
         $dh = new DataHandler('appointment');
+
         $dh->insert();
     }
 

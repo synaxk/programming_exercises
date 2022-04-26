@@ -3,16 +3,25 @@ require_once "../db/DataHandler.php";
 require_once "../businessLogic/AppointmentHandler.php";
 require_once "../models/Appointment.php";
 
+$ah = new AppointmentHandler();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
     if (isset($_POST["appointmentID"])) {
-        //update
-        echo "TestPost";
-    } else {
         //insert
+        if (isset($_POST["dateID"])) {
+            $data = $_POST;
+            $ah->vote($data);
+            echo json_encode("Comment added successfully.");
+        } elseif (isset($_POST["text"])) {
+            //new comment
+            $ah->comment($_POST);
+            echo json_encode("Vote submitted successfully.");
+        }
+    } else {
+
     }
 
 } elseif ($_SERVER["REQUEST_METHOD"] == "GET") {
-    $ah = new AppointmentHandler();
 
     if (isset($_GET["id"])) {
         $appointment_ID = $_GET["id"];
