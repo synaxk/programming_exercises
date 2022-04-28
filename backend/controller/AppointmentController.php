@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo json_encode("Vote submitted successfully.");
         }
     } else {
-
+        $ah->createAppointment($_POST);
     }
 
 } elseif ($_SERVER["REQUEST_METHOD"] == "GET") {

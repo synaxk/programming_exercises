@@ -36,6 +36,7 @@ class DataHandler {
         $paramPlaceHolder = "";
         $i = 0;
         foreach ($data as $key => $value) {
+            if (!is_string())
             $columns .= $key . ",";
             $valuePlaceHolder .= "?,";
             if (preg_match('/.*ID/',$key)) {
@@ -53,6 +54,7 @@ class DataHandler {
         $query = $this->sqlConnection->prepare($query);
         $query->bind_param("$paramPlaceHolder", ...$values);
         $query->execute();
+        return $query->insert_id;
     }
 
     public function update($whereClause, $key, $value) {

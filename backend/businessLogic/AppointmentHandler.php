@@ -35,15 +35,19 @@ class AppointmentHandler {
     public function createAppointment($data) {
         $appointment = new Appointment($data['title'], $data['location'], $data['dueDate']);
 
-        $dates = $data['dates'];
-        $votes = $data['votes'];
-        $comments = $data['comments'];
+        $dates = $data["dates"];
+        unset($data["dates"]);
 
         //todo: store appointment -> get new appointment id
         // store relations
         $dh = new DataHandler('appointment');
+        $appointmentID = $dh->insert($data);
 
-        $dh->insert();
+        $dh->changeTable("dates");
+        foreach ($dates as $date) {
+            $date["appointmentID"] = $appointmentID;
+            $dh->insert($date);
+        }
     }
 
     public function vote($data) {

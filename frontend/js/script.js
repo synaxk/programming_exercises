@@ -112,9 +112,24 @@ function createNewAppointment(){
     /** add click event for "addDate to list" button*/
     $("#addDate").click(()=> addDateOption());
     $("#submitNewAppointment").click(()=>{
-        var childrenArray = $("#dateList").children().text(); //zugewiesen wird ein string in dem alle als text stehen
-        console.log(childrenArray);
-       var listItem = $("#dateList").first();
+
+        let dates = [];
+
+        let newAppointment = {
+            "tilte": "test",
+            "dates": []
+
+        }
+
+        $("#dateList").children().each((index, item) => {
+                console.log(item)
+                dates[index] = item
+            }
+        );
+
+     //   var childrenArray = $("#dateList").children().text(); //zugewiesen wird ein string in dem alle als text stehen
+       // console.log(childrenArray);
+       // var listItem = $("#dateList").first();
         //(for(child in listItems){
         //    console.log(listItems[child]);
        // }
@@ -129,7 +144,8 @@ function createNewAppointment(){
 function addDateOption() {
     if($("#dateOption").val() != "" && $("#startTime").val()) {
         $("#dateList").append("<p><button class='btn btn-outline-danger btn-sm' onclick='$(this).parent().remove()'>X</button>Date: "
-            + $("#dateOption").val() + " Start Time: " + $("#startTime").val() + "</p>");
+            + $("#dateOption").val() + " Start Time: " + $("#startTime").val() + "</p>" +
+            "<p class='dateValue' style='display: none'>" + $("#dateOption").val() + " " + $("#startTime").val() + ":00</p>");
     }
 }
 
