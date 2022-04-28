@@ -12,13 +12,6 @@ $(window).on("load", () => {
     /** add click event for new Appointment button */
     $("#createAppointment").click(()=>createNewAppointment());
 
-
-
-    /**click .outside class to leave and clear the detail view //////////////////KANN WEG
-    $(".outside").on("click", () => {
-        $("#details").hide().children().remove();
-        $("#list").show();
-    })*/
 });
 
 /**load appointment list from the api*/
@@ -101,8 +94,8 @@ function createDetailView(item, appointmentID) {
 }
 
 function createNewAppointment(){
-    $("#details").toggle();
-    $("#list").toggle();
+    $("#details").hide();
+    $("#list").hide();
     $("#createAppointment").hide();
     $("#dates").show();
     $("#dateList").show();
@@ -115,33 +108,36 @@ function createNewAppointment(){
 
         let dates = [];
 
-        let newAppointment = {
-            "tilte": "test",
-            "location": "test",
-            "dates": [
-                {"startDate": "2022-04-22 14:00:00",
-                 "endDate": "2022-04-22 16:00:00"
-                },
-                {"startDate": "2022-05-22 14:00:00",
-                    "endDate": "2022-05-22 16:00:00"
-                },
-            ]
-
-        }
-
-        $("#dateList").children().each((index, item) => {
-                console.log(item)
-                dates[index] = item
+        $("#dateList").children(".dateValue").each((index, item) => {
+                console.log(item.innerText);
+                if(item.innerText != "") { //only dates are stored in array, not <b> and <p>
+                    let opts = item.innerText.split(',');
+                    dates[index] = {"startDate": opts[0],
+                        "endDate": opts[1]
+                    }
+                }
             }
         );
 
-     //   var childrenArray = $("#dateList").children().text(); //zugewiesen wird ein string in dem alle als text stehen
-       // console.log(childrenArray);
-       // var listItem = $("#dateList").first();
-        //(for(child in listItems){
-        //    console.log(listItems[child]);
-       // }
+        let newAppointment = {
+            "tilte": $("#new_title").val(),
+            "location": $("#new_location").val(),
+            "dates": dates
 
+        }
+        $.ajax({
+            url:"../backend/controller/AppointmentController.php",
+            type: "POST",
+            dataType: "json",
+            data: newAppointment,
+            success: function(response) {
+                console.log(response);
+
+            },
+            error: function(e){
+                console.log(this.data);
+            }
+        });
     });
 
 
@@ -152,15 +148,12 @@ function createNewAppointment(){
 function addDateOption() {
     if($("#dateOption").val() != "" && $("#startTime").val()) {
         $("#dateList").append("<p><button class='btn btn-outline-danger btn-sm' onclick='$(this).parent().remove()'>X</button>Date: "
-            + $("#dateOption").val() + " Start Time: " + $("#startTime").val() + "</p>" +
-            "<p class='dateValue' style='display: none'>" + $("#dateOption").val() + " " + $("#startTime").val() + ":00</p>");
+            + $("#dateOption").val() + " Start Time: " + $("#startTime").val() + " End Time: "+$("#endTime").val()+"</p>" +
+            "<p class='dateValue' style='display: none'>" + $("#dateOption").val() +" "+$("#startTime").val()+":00,"
+            + $("#dateOption").val() +" "+$("#endTime").val() + ":00</p>");
     }
 }
 
-
-
-///////////////////
-//date options array :
 
 
 /*
@@ -173,24 +166,7 @@ function submit() {
 
 }
 
-
-function addDate() {
-    let newDateObject = "<div></div>"
-}
-*/
-
-/* TODO:
-    hide details
-    toggle details onclick
-
-* */
-
-
-// datepicker fügt datum in datelist hinzu
-/// <div id="dateList">
-//      <p>2022-05-01 14:00:00</p>
-//      <p>2022-05-01 16:00:00</p>
-// </div>
-
 /// [{"AppointmentID":"1","Title":"TestAppointment","Location":"TestLocation","DueDate":"2022-05-01 17:08:26"},
 // {"AppointmentID":"2","Title":"TestAppointment2","Location":"TestLocation2","DueDate":"2022-05-01 17:08:44"}]
+
+ */
