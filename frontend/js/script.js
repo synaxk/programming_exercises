@@ -11,7 +11,19 @@ $(window).on("load", () => {
 
     /** add click event for new Appointment button */
     $("#createAppointment").click(()=>createNewAppointment());
-
+    $("#back").click(()=>{
+        $("#details").hide();
+        $("#list").show();
+        $("#newAppointment").hide();
+        $("#createAppointment").show();
+    })
+    $("#cancel").click(()=>{
+        $("#dateList").empty();
+        $("#dates").hide();
+        $("#newAppointment").hide();
+        //hide dateList
+        //hide
+    })
 });
 
 /**load appointment list from the api*/
@@ -83,6 +95,8 @@ function createDetailView(item, appointmentID) {
         "<label for='user'>Username:</label><br><input id='user' type='text'/>" +
         "<button onclick='submitVote("+appointmentID+")'>Vote</button>" +
         "<div id='comments'>Comments:</div>").show();
+    $("#details").append("<label for='comment'>Comment</label><br><textarea id='new_comment'>"+
+        "</textarea><br><button id='submitComment'>Submit Comment</button>");
 
     /**add date options*/
     item.dates.forEach((date) => $("#vote_options").append("<input type='radio' name='vote' id=date'"
@@ -90,6 +104,7 @@ function createDetailView(item, appointmentID) {
         +"'>" +date.startDate+ " - "+ date.endDate+"</label><br>"));
 
     /**add comments /////////////////////TODO comment adden*/
+    //$("#submitComment").click()
    // item.comments.forEach((comment) => $("#comments").append("<div>"+ comment.username +": "+ comment.text +"</div>"));
 }
 
@@ -122,6 +137,7 @@ function createNewAppointment(){
         let newAppointment = {
             "tilte": $("#new_title").val(),
             "location": $("#new_location").val(),
+            "dueDate": $("#new_dueDate").val,
             "dates": dates
 
         }
