@@ -117,7 +117,15 @@ function createNewAppointment(){
 
         let newAppointment = {
             "tilte": "test",
-            "dates": []
+            "location": "test",
+            "dates": [
+                {"startDate": "2022-04-22 14:00:00",
+                 "endDate": "2022-04-22 16:00:00"
+                },
+                {"startDate": "2022-05-22 14:00:00",
+                    "endDate": "2022-05-22 16:00:00"
+                },
+            ]
 
         }
 
