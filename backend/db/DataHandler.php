@@ -29,14 +29,16 @@ class DataHandler {
         return $data;
     }
 
+    /**generic database insert*/
     public function insert($data) {
         $columns = "";
         $values = [];
         $valuePlaceHolder = "";
         $paramPlaceHolder = "";
         $i = 0;
+        /**build parts of sql statement $key.. column names $value are actual values*/
+        /**concat and separate columns and values with ','*/
         foreach ($data as $key => $value) {
-            if (!is_string())
             $columns .= $key . ",";
             $valuePlaceHolder .= "?,";
             if (preg_match('/.*ID/',$key)) {
@@ -46,21 +48,19 @@ class DataHandler {
             }
             $values[$i++] = $value;
         }
-
+        /**remove last ','*/
         $columns = rtrim($columns, ',');
         $valuePlaceHolder = rtrim($valuePlaceHolder, ',');
 
+        /**build query for prepare statement*/
         $query = "INSERT INTO $this->table ($columns) VALUES ($valuePlaceHolder) ";
         $query = $this->sqlConnection->prepare($query);
+        /**bind values from $values array*/
         $query->bind_param("$paramPlaceHolder", ...$values);
         $query->execute();
-        return $query->insert_id;
-    }
 
-    public function update($whereClause, $key, $value) {
-        $query = "UPDATE $this->table SET $key='$value' WHERE $whereClause";
-        $query = $this->sqlConnection->prepare($query);
-        $query->execute();
+        /**return the id of the inserted entry*/
+        return $query->insert_id;
     }
 
     public function delete($whereClause) {

@@ -8,23 +8,18 @@ $(window).on("load", () => {
 
     /**load appointment list*/
     getAppointments();
-
     /** add click event for new Appointment button */
     $("#createAppointment").click(()=>createNewAppointment());
-
     $("#back").click(()=>back());
-
     $("#cancel").click(()=>{
         $("#dateList").empty();
         $("#dates").hide();
         $("#newAppointment").hide();
-
     });
 });
 
 function back() {
     $("#details").empty().hide();
-
     $("#newAppointment").hide();
     $("#createAppointment").show();
     $("#list").empty().show();
@@ -36,7 +31,7 @@ function back() {
 function getAppointments() {
     $.ajax({
         type: "GET",
-        url: "../backend/controller/AppointmentController.php",
+        url: "../backend/ServiceHandler.php",
         cache: "false",
         dataType: "json",
         success: function (response) {
@@ -51,7 +46,7 @@ function getAppointment(appointmentID) {
     console.log("Get AppointmentID")
     $.ajax({
         type: "GET",
-        url: "../backend/controller/AppointmentController.php?id=" + appointmentID,
+        url: "../backend/ServiceHandler.php?id=" + appointmentID,
         cache: "false",
         dataType: "json",
         success: function (response) {
@@ -69,13 +64,12 @@ function submitVote($appointmentID){
     };
 
     $.ajax({
-        url:"../backend/controller/AppointmentController.php",
+        url:"../backend/ServiceHandler.php",
         type: "POST",
         dataType: "json",
         data: voteInput,
         success: function(response) {
             console.log(response);
-
         },
         error: function(e){
             console.log(this.data);
@@ -122,13 +116,11 @@ function createNewAppointment(){
     $("#dateList").show();
     $("#newAppointment").show();
 
-
     /** add click event for "addDate to list" button*/
     $("#addDate").click(()=> addDateOption());
     $("#submitNewAppointment").click(()=>{
 
         let dates = [];
-
         $("#dateList").children(".dateValue").each((index, item) => {
                 console.log(item.innerText);
                 if(item.innerText != "") { //only dates are stored in array, not <b> and <p>

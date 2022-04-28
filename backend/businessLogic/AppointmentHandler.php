@@ -33,17 +33,17 @@ class AppointmentHandler {
     }
 
     public function createAppointment($data) {
-        $appointment = new Appointment($data['title'], $data['location'], $data['dueDate']);
 
         $dates = $data["dates"];
         unset($data["dates"]);
 
         //todo: store appointment -> get new appointment id
         // store relations
+        $data["dueDate"] = "2022-05-12 12:12:12";
         $dh = new DataHandler('appointment');
         $appointmentID = $dh->insert($data);
 
-        $dh->changeTable("dates");
+        $dh->changeTable("date");
         foreach ($dates as $date) {
             $date["appointmentID"] = $appointmentID;
             $dh->insert($date);
