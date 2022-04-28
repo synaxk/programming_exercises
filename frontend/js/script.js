@@ -1,17 +1,24 @@
 /**use window on load to wait for DOM elements to load*/
 $(window).on("load", () => {
-    /**hide detail view on load*/
+    /**hide detail view, div for newAppointment and div for new dates on load*/
     $("#details").hide();
     $("#dates").hide();
+    $("#dateList").hide();
+    $("#newAppointment").hide();
 
     /**load appointment list*/
     getAppointments();
 
-    /**click .outside class to leave and clear the detail view*/
+    /** add click event for new Appointment button */
+    $("#createAppointment").click(()=>createNewAppointment());
+
+
+
+    /**click .outside class to leave and clear the detail view //////////////////KANN WEG
     $(".outside").on("click", () => {
         $("#details").hide().children().remove();
         $("#list").show();
-    })
+    })*/
 });
 
 /**load appointment list from the api*/
@@ -75,6 +82,7 @@ function addItemToList(item) {
 
 /**create appointment-details view with date options and comments*/
 function createDetailView(item, appointmentID) {
+    $("#list").hide(); //funktioniert nicht wenn vorher detail
     console.log(item);
     /**create detail view of appointment*/
     $("#details").prepend("<h4>"+ item.title+" </h4><p>"+item.location+"</p>" +
@@ -88,33 +96,48 @@ function createDetailView(item, appointmentID) {
         + date.dateID +"' value='"+ date.dateID+ "'><label for='date"+ date.dateID
         +"'>" +date.startDate+ " - "+ date.endDate+"</label><br>"));
 
-    /**add comments*/
-    item.comments.forEach((comment) => $("#comments").append("<div>"+ comment.username +": "+ comment.text +"</div>"));
+    /**add comments /////////////////////TODO comment adden*/
+   // item.comments.forEach((comment) => $("#comments").append("<div>"+ comment.username +": "+ comment.text +"</div>"));
 }
 
+function createNewAppointment(){
+    $("#details").toggle();
+    $("#list").toggle();
+    $("#createAppointment").hide();
+    $("#dates").show();
+    $("#dateList").show();
+    $("#newAppointment").show();
 
+
+    /** add click event for "addDate to list" button*/
+    $("#addDate").click(()=> addDateOption());
+    $("#submitNewAppointment").click(()=>{
+        var childrenArray = $("#dateList").children().text(); //zugewiesen wird ein string in dem alle als text stehen
+        console.log(childrenArray);
+       var listItem = $("#dateList").first();
+        //(for(child in listItems){
+        //    console.log(listItems[child]);
+       // }
+
+    });
+
+
+}
 //////////////////////////////////////////////
 //when creating a new appointment -> add as many date options as you like
 //appends input from date input fields + button with onclick to remove dateOption from list
 function addDateOption() {
-    console.log("something");
-    $("#dateList").append("<p><button class='btn btn-outline-danger btn-sm' onclick='$(this).parent().remove()'>X</button>Date: "
-        + $("#dateOption").val() + " Start Time: "+$("#startTime").val()+"</p>");
+    if($("#dateOption").val() != "" && $("#startTime").val()) {
+        $("#dateList").append("<p><button class='btn btn-outline-danger btn-sm' onclick='$(this).parent().remove()'>X</button>Date: "
+            + $("#dateOption").val() + " Start Time: " + $("#startTime").val() + "</p>");
+    }
 }
 
 
 
-$("#submitDates").on("click", function(){
-    var listItems = $("#dateList").childNodes;
-    for(child in listItems){
-        console.log(listItems[child]);
-    }
-});
 ///////////////////
 //date options array :
 
-
-////////////////////////////////////////////
 
 /*
 function submit() {
