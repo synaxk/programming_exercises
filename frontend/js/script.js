@@ -11,20 +11,26 @@ $(window).on("load", () => {
 
     /** add click event for new Appointment button */
     $("#createAppointment").click(()=>createNewAppointment());
-    $("#back").click(()=>{
-        $("#details").hide();
-        $("#list").show();
-        $("#newAppointment").hide();
-        $("#createAppointment").show();
-    })
+
+    $("#back").click(()=>back());
+
     $("#cancel").click(()=>{
         $("#dateList").empty();
         $("#dates").hide();
         $("#newAppointment").hide();
-        //hide dateList
-        //hide
-    })
+
+    });
 });
+
+function back() {
+    $("#details").empty().hide();
+
+    $("#newAppointment").hide();
+    $("#createAppointment").show();
+    $("#list").empty().show();
+    getAppointments();
+
+}
 
 /**load appointment list from the api*/
 function getAppointments() {
@@ -137,10 +143,10 @@ function createNewAppointment(){
         let newAppointment = {
             "title": $("#new_title").val(),
             "location": $("#new_location").val(),
-            "dueDate": $("#new_dueDate").val,
+            "dueDate": $("#new_dueDate").val(),
             "dates": dates
+        };
 
-        }
         $.ajax({
             url:"../backend/controller/AppointmentController.php",
             type: "POST",
@@ -156,7 +162,7 @@ function createNewAppointment(){
         });
     });
 
-
+    back();
 }
 //////////////////////////////////////////////
 //when creating a new appointment -> add as many date options as you like
