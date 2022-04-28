@@ -3,19 +3,14 @@ $(window).on("load", () => {
     /**hide detail view, div for newAppointment and div for new dates on load*/
     $("#details").hide();
     $("#dates").hide();
-    $("#dateList").hide();
     $("#newAppointment").hide();
 
     /**load appointment list*/
     getAppointments();
-    /** add click event for new Appointment button */
+    /** add click event for new Appointment button, back button */
     $("#createAppointment").click(()=>createNewAppointment());
     $("#back").click(()=>back());
-    $("#cancel").click(()=>{
-        $("#dateList").empty();
-        $("#dates").hide();
-        $("#newAppointment").hide();
-    });
+
 });
 
 function back() {
@@ -109,44 +104,23 @@ function createDetailView(item, appointmentID) {
 }
 
 function createNewAppointment(){
+    loadNewAppointmentForm();
+    loadDateForm();
     $("#details").hide();
     $("#list").hide();
     $("#createAppointment").hide();
     $("#dates").show();
-    $("#dateList").show();
     $("#newAppointment").show();
 
-    /** add click event for "addDate to list" button*/
-    $("#addDate").click(()=> addDateOption());
     $("#submitNewAppointment").click(()=>{
-
-        let dates = [];
-        $("#dateList").children(".dateValue").each((index, item) => {
-                console.log(item.innerText);
-                if(item.innerText != "") { //only dates are stored in array, not <b> and <p>
-                    let opts = item.innerText.split(',');
-                    dates[index] = {"startDate": opts[0],
-                        "endDate": opts[1]
-                    }
-                }
-            }
-        );
-
-        let newAppointment = {
-            "title": $("#new_title").val(),
-            "location": $("#new_location").val(),
-            "dueDate": $("#new_dueDate").val(),
-            "dates": dates
-        };
 
         $.ajax({
             url:"../backend/controller/AppointmentController.php",
             type: "POST",
             dataType: "json",
-            data: newAppointment,
+            data: createAppointmentObject(),
             success: function(response) {
                 console.log(response);
-
             },
             error: function(e){
                 console.log(this.data);
@@ -156,9 +130,32 @@ function createNewAppointment(){
 
     back();
 }
-//////////////////////////////////////////////
+
+function createAppointmentObject(){
+    let dates = [];
+    $("#dateList").children(".dateValue").each((index, item) => {
+            console.log(item.innerText);
+            if(item.innerText != "") { //only dates are stored in array, not <b> and <p>
+                let opts = item.innerText.split(',');
+                dates[index] = {"startDate": opts[0],
+                    "endDate": opts[1]
+                }
+            }
+        }
+    );
+
+    let newAppointment = {
+        "title": $("#new_title").val(),
+        "location": $("#new_location").val(),
+        "dueDate": $("#new_dueDate").val(),
+        "dates": dates
+    };
+    return newAppointment;
+}
+
 //when creating a new appointment -> add as many date options as you like
 //appends input from date input fields + button with onclick to remove dateOption from list
+
 function addDateOption() {
     if($("#dateOption").val() != "" && $("#startTime").val()) {
         $("#dateList").append("<p><button class='btn btn-outline-danger btn-sm' onclick='$(this).parent().remove()'>X</button>Date: "
@@ -168,19 +165,36 @@ function addDateOption() {
     }
 }
 
+function loadDateForm(){
+    $("#dates").append(
+        "<br><label htmlFor='dateOption'>Date Option</label><br>"+
+        "<input type='date' id='dateOption'><br>"+
+        "<label htmlFor='startTime'>Start Time</label><br>"+
+        "<input type='time' id='startTime'><br>"+
+        "<label htmlFor='endTime'>End Time</label><br>"+
+        "<input type='time' id='endTime'>"+
+        "<button id='addDate' className='btn btn-outline-success'>Add Date</button><br>"+ // BUTTON add date
+        "<button id='submitNewAppointment' className='btn btn-outline-success'>Submit</button><br>"+ //BUTTON submit
+        "<button id='cancel' className='btn btn-outline-danger'>Cancel</button><br>" + //BUTTON cancel
+        "<div className='col-sm' id='dateList'><br></div>");
 
+    $("#cancel").click(()=>{
+        $("#dateList").empty();
+        $("#dates").hide();
+        $("#newAppointment").hide();
+    });
 
-/*
-function submit() {
-    $data = {
-        "AppointmentID": $appointmentID,
-        "Username": $("#user").val(),
-    }
-
-
+    /** add click event for "addDate to list" button*/
+    $("#addDate").click(()=> addDateOption());
 }
 
-/// [{"AppointmentID":"1","Title":"TestAppointment","Location":"TestLocation","DueDate":"2022-05-01 17:08:26"},
-// {"AppointmentID":"2","Title":"TestAppointment2","Location":"TestLocation2","DueDate":"2022-05-01 17:08:44"}]
-
- */
+function loadNewAppointmentForm(){
+    $("#newAppointment").append(
+        "<h3>New Appointment</h3><br>"+
+        "<label htmlFor='new_title'>Title</label><br>"+
+        "<input type='text' id='new_title'><br>"+
+        "<label htmlFor='new_location'>Location</label><br>"+
+        "<input type='text' id='new_location'><br>"+
+        "<label htmlFor='new_dueDate'>Votable until</label><br>"+
+        "<input type='date' id='new_dueDate'>");
+}
