@@ -19,7 +19,6 @@ function back() {
     $("#createAppointment").show();
     $("#list").empty().show();
     getAppointments();
-
 }
 
 /**load appointment list from the api*/
@@ -37,7 +36,7 @@ function getAppointments() {
 
 /**select specific appointment from api, hide the list and show details*/
 function getAppointment(appointmentID) {
-    $("#list").toggle(); //geändert /////////////
+    $("#list").hide(); //geändert /////////////
     console.log("Get AppointmentID")
     $.ajax({
         type: "GET",
@@ -47,7 +46,7 @@ function getAppointment(appointmentID) {
         success: function (response) {
             createDetailView(response, appointmentID);
         }
-    })
+    });
 }
 
 /**send vote request to api*/
@@ -104,16 +103,17 @@ function createDetailView(item, appointmentID) {
 }
 
 function createNewAppointment(){
+    $("#list").hide();
+
+    console.log("testsetessetsetset");
     loadNewAppointmentForm();
     loadDateForm();
     $("#details").hide();
-    $("#list").hide();
     $("#createAppointment").hide();
     $("#dates").show();
     $("#newAppointment").show();
 
     $("#submitNewAppointment").click(()=>{
-
         $.ajax({
             url:"../backend/controller/AppointmentController.php",
             type: "POST",
@@ -127,8 +127,6 @@ function createNewAppointment(){
             }
         });
     });
-
-    back();
 }
 
 function createAppointmentObject(){
@@ -191,10 +189,10 @@ function loadDateForm(){
 function loadNewAppointmentForm(){
     $("#newAppointment").append(
         "<h3>New Appointment</h3><br>"+
-        "<label htmlFor='new_title'>Title</label><br>"+
+        "<label for='new_title'>Title</label><br>"+
         "<input type='text' id='new_title'><br>"+
-        "<label htmlFor='new_location'>Location</label><br>"+
+        "<label for='new_location'>Location</label><br>"+
         "<input type='text' id='new_location'><br>"+
-        "<label htmlFor='new_dueDate'>Votable until</label><br>"+
+        "<label for='new_dueDate'>Votable until</label><br>"+
         "<input type='date' id='new_dueDate'>");
 }
