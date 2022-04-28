@@ -135,7 +135,7 @@ function createNewAppointment(){
         );
 
         let newAppointment = {
-            "tilte": $("#new_title").val(),
+            "title": $("#new_title").val(),
             "location": $("#new_location").val(),
             "dueDate": $("#new_dueDate").val,
             "dates": dates
