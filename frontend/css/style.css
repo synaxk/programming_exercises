@@ -1,22 +1,21 @@
 body{
     background: whitesmoke;
     color: #273b16;
-    font-family: "Calibri Light";
     margin: 2vh;
     padding: 2vh;
-
 }
 div{
 
 }
 .btn{
     paddind: 5px 10px;
-   font-size: medium;
+    font-size: medium;
 
 }
 #createAppointment{
+
 }
 
-.left {
+.brt {
     text-align: right;
 }

@@ -81,9 +81,10 @@ function addItemToList(item) {
         valid = "<p style='color:red'>Expired since: "+item.dueDate+"</p>";
     }
 
-    $("#list").append("<div class='item'><h5 onclick='getAppointment("+item.appointmentID+")'>" + item.title +  "</h5> " +
-        "<button class='btn btn-outline-danger btn-sm' onclick='deleteAppointment("+item.appointmentID+");$(this).parent().remove()'>X</button>" +
-        "<p>"+item.location+"</p>" + valid +"</div>");
+    $("#list").append("<div class='item row'><div class='col-sm'><h5 onclick='getAppointment("+item.appointmentID+")'>" + item.title + "</h5> "
+         +item.location + valid +"</div>"+
+        "<div class='col-sm' style='padding-top: 20px'><button class='btn btn-outline-danger btn-sm' onclick='deleteAppointment("+item.appointmentID+");" +
+        "$(this).parent().parent().remove()'>X</button></div></div><br>");
 
 }
 
@@ -108,10 +109,10 @@ function createDetailView(item, appointmentID) {
     $("#details").prepend("<h4>"+ item.title+" </h4><p>"+item.location+"</p>" +
         "<p>Vote until: "+item.dueDate+"</p><div id='vote_options' ><h6>Please choose a date</h6></div>" +
         "<label for='user'>Username:</label><br><input id='user' type='text'/>" +
-        "<button onclick='submitVote("+appointmentID+")'>Vote</button>" +
+        "<button class='btn btn-outline-success' onclick='submitVote("+appointmentID+")'>Vote</button>" +
         "<div id='comments'>Comments:</div>").show();
     $("#details").append("<label for='comment'>Comment</label><br><textarea id='new_comment'>"+
-        "</textarea><br><button id='submitComment'>Submit Comment</button>");
+        "</textarea><br><button class='btn btn-outline-success' id='submitComment'>Submit Comment</button>");
 
     /**add date options*/
     if (item.dates.length > 0) {
