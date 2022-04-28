@@ -8,16 +8,14 @@ $(window).on("load", () => {
     /**load appointment list*/
     getAppointments();
     /** add click event for new Appointment button, back button */
-    $("#createAppointment").click(()=>createNewAppointment());
-    $("#back").click(()=>back());
+    $("#newButton").click(()=>createNewAppointment());
+    $("#backButton").click(()=>back());
 
 });
 
 function back() {
     $("#details").empty().hide();
-    $("#newAppointment").hide();
-    $("#createAppointment").show();
-    $("#list").empty().show();
+    $("#newAppointment").empty().hide();
     getAppointments();
 }
 
@@ -29,7 +27,10 @@ function getAppointments() {
         cache: "false",
         dataType: "json",
         success: function (response) {
+            console.log(response);
+            $("#list").empty().show();
             response.forEach((item) => addItemToList(item));
+            $("#newButton").show();
         }
     })
 }
@@ -63,6 +64,7 @@ function submitVote($appointmentID){
         dataType: "json",
         data: voteInput,
         success: function(response) {
+            back();
             console.log(response);
         },
         error: function(e){
@@ -73,10 +75,23 @@ function submitVote($appointmentID){
 
 /**add appointments to the list*/
 function addItemToList(item) {
-    console.log(item);
-    $("#list").append("<p><p><h5 onclick='getAppointment("+item.appointmentID+")'>" + item.title +  "</h5>" +
-        "</p><p>"+item.location+"</p><p>Vote until: "+item.dueDate+"</p></p>");
+    $("#list").append("<div class='item'><h5 onclick='getAppointment("+item.appointmentID+")'>" + item.title +  "</h5> " +
+        "<button class='btn btn-outline-danger btn-sm' onclick='deleteAppointment("+item.appointmentID+");$(this).parent().remove()'>X</button>" +
+        "<p>"+item.location+"</p><p>Vote until: "+item.dueDate+"</p></div>");
 
+}
+
+function deleteAppointment(appointmentID) {
+    $.ajax({
+        url:"../backend/ServiceHandler.php",
+        type: "POST",
+        dataType: "json",
+        data: {"appointmentID": appointmentID,
+                "delete": true},
+        success: function(response) {
+            console.log(response);
+        }
+    });
 }
 
 /**create appointment-details view with date options and comments*/
@@ -93,37 +108,77 @@ function createDetailView(item, appointmentID) {
         "</textarea><br><button id='submitComment'>Submit Comment</button>");
 
     /**add date options*/
-    item.dates.forEach((date) => $("#vote_options").append("<input type='radio' name='vote' id=date'"
-        + date.dateID +"' value='"+ date.dateID+ "'><label for='date"+ date.dateID
-        +"'>" +date.startDate+ " - "+ date.endDate+"</label><br>"));
+    if (item.dates.length > 0) {
+   /*     let vote = "";
+        if (item.votes.length > 0) {
+            let voteCount = 0;
+            item.votes.forEach((vote) => {
+                console.log(item.dates);
 
-    /**add comments /////////////////////TODO comment adden*/
-    //$("#submitComment").click()
-   // item.comments.forEach((comment) => $("#comments").append("<div>"+ comment.username +": "+ comment.text +"</div>"));
+            });
+
+            vote = "Votes: "+ voteCount;
+
+        }*/
+        item.dates.forEach((date) => $("#vote_options").append("<input type='radio' name='vote' id=date'"
+            + date.dateID +"' value='"+ date.dateID+ "'><label for='date"+ date.dateID
+            +"'>" +date.startDate+ " - "+ date.endDate+"</label><br>"));
+    }
+
+    item.comments.forEach((comment) => $("#comments").append("<div>"+ comment.username +": "+ comment.text +"</div>"));
+
+    /*add comments*/
+    if($("#comment").val() != "") {
+        $("#submitComment").click(() => addComment(appointmentID, $("#user").val(), $("#new_comment").val()));
+    }
+}
+
+function addComment(appointmentID, user, comment){
+    let newComment = {
+        "username": user,
+        "appointmentID": appointmentID,
+        "text": comment
+    };
+    $.ajax({
+        url:"../backend/ServiceHandler.php",
+        type: "POST",
+        dataType: "json",
+        data: newComment,
+        success: function(response) {
+            back();
+            console.log(response);
+        },
+        error: function(e){
+            console.log("tsetetstsetset");
+        }
+    });
+
 }
 
 function createNewAppointment(){
+    /**hide list and detail view*/
     $("#list").hide();
-
-    console.log("testsetessetsetset");
-    loadNewAppointmentForm();
-    loadDateForm();
     $("#details").hide();
-    $("#createAppointment").hide();
-    $("#dates").show();
+
+    /**create appointment-form in newAppointment div*/
+    loadNewAppointmentForm();
+
+    /**button*/
+    $("#newButton").hide();
+
+    /**show newAppointment div*/
     $("#newAppointment").show();
 
     $("#submitNewAppointment").click(()=>{
         $.ajax({
-            url:"../backend/controller/AppointmentController.php",
+            url:"../backend/ServiceHandler.php",
             type: "POST",
             dataType: "json",
             data: createAppointmentObject(),
             success: function(response) {
                 console.log(response);
-            },
-            error: function(e){
-                console.log(this.data);
+                $("#newAppointment").empty().hide();
+                getAppointments();
             }
         });
     });
@@ -177,9 +232,7 @@ function loadDateForm(){
         "<div className='col-sm' id='dateList'><br></div>");
 
     $("#cancel").click(()=>{
-        $("#dateList").empty();
-        $("#dates").hide();
-        $("#newAppointment").hide();
+        back();
     });
 
     /** add click event for "addDate to list" button*/
@@ -194,5 +247,8 @@ function loadNewAppointmentForm(){
         "<label for='new_location'>Location</label><br>"+
         "<input type='text' id='new_location'><br>"+
         "<label for='new_dueDate'>Votable until</label><br>"+
-        "<input type='date' id='new_dueDate'>");
+        "<input type='date' id='new_dueDate'>" +
+        "<div id='dates'></div>"
+    );
+    loadDateForm();
 }

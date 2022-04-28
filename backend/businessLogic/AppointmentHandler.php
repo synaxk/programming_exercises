@@ -15,31 +15,30 @@ class AppointmentHandler {
 
     public function getAppointmentDetails($appointmentID) {
         $dh = new DataHandler('appointment');
-        $data = $dh->selectAll("appointmentID='" . $appointmentID . "'");
+        $data = $dh->selectAll("appointmentID=$appointmentID")[0];
         $appointment = new Appointment($data['appointmentID'], $data['title'], $data['location'], $data['dueDate']);
 
         $dh->changeTable('date');
-        $dates = $dh->selectAll("appointmentID='" . $appointmentID . "'");
+        $dates = $dh->selectAll("appointmentID=$appointmentID");
         $appointment->setDates($dates);
 
         $dh->changeTable('vote');
-        $votes = $dh->selectAll("appointmentID='" . $appointmentID . "'");
+        $votes = $dh->selectAll("appointmentID=$appointmentID");
         $appointment->setVotes($votes);
 
         $dh->changeTable('comment');
-        $comments = $dh->selectAll("appointmentID='" . $appointmentID . "'");
+        $comments = $dh->selectAll("appointmentID=$appointmentID");
         $appointment->setComments($comments);
         return $appointment;
     }
 
     public function createAppointment($data) {
-
         $dates = $data["dates"];
         unset($data["dates"]);
 
         //todo: store appointment -> get new appointment id
         // store relations
-        $data["dueDate"] = "2022-05-12 12:12:12";
+    //    $data["dueDate"] = "2022-05-12 12:12:12";
         $dh = new DataHandler('appointment');
         $appointmentID = $dh->insert($data);
 
@@ -48,6 +47,22 @@ class AppointmentHandler {
             $date["appointmentID"] = $appointmentID;
             $dh->insert($date);
         }
+    }
+
+    public function delete($appointmentID){
+        /**delete relations*/
+        $dh = new DataHandler('date');
+        $dh->delete("appointmentID=$appointmentID");
+
+        $dh->changeTable('comment');
+        $dh->delete("appointmentID=$appointmentID");
+
+        $dh->changeTable('vote');
+        $dh->delete("appointmentID=$appointmentID'");
+
+        /**delete Appointment*/
+        $dh->changeTable('appointment');
+        $dh->delete("appointmentID=$appointmentID");
     }
 
     public function vote($data) {

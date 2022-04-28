@@ -23,9 +23,8 @@ class DataHandler {
         while ($row = $result->fetch_assoc()) {
             $data[] = $row;
         }
-        if (count($data) == 1) {
-            return $data[0];
-        }
+
+
         return $data;
     }
 
@@ -64,7 +63,8 @@ class DataHandler {
     }
 
     public function delete($whereClause) {
-        $query = "DELETE $this->table WHERE $whereClause";
+        $query = "DELETE FROM $this->table WHERE $whereClause";
+        return $this->sqlConnection->query($query);
     }
 
 }

@@ -11,14 +11,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (isset($_POST["dateID"])) {
             $data = $_POST;
             $ah->vote($data);
-            echo json_encode("Comment added successfully.");
+            echo json_encode("Vote submitted successfully.");
         } elseif (isset($_POST["text"])) {
             //new comment
             $ah->comment($_POST);
-            echo json_encode("Vote submitted successfully.");
+            echo json_encode("Comment added successfully.");
+        } elseif (isset($_POST["delete"])) {
+            $result = $ah->delete($_POST["appointmentID"]);
+            if ($result) {
+                echo json_encode("Appointment deleted successfully");
+            }
         }
     } else {
         $ah->createAppointment($_POST);
+        echo json_encode("Appointment created successfully.");
     }
 
 } elseif ($_SERVER["REQUEST_METHOD"] == "GET") {
