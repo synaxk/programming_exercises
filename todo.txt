@@ -1,3 +1,0 @@
-todo:
- - backend:
- insert, update, delete

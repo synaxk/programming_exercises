@@ -75,9 +75,15 @@ function submitVote($appointmentID){
 
 /**add appointments to the list*/
 function addItemToList(item) {
+    let valid = "<p>Vote until: "+item.dueDate+"</p>";
+
+    if (Date.now() > Date.parse(item.dueDate)) {
+        valid = "<p style='color:red'>Expired since: "+item.dueDate+"</p>";
+    }
+
     $("#list").append("<div class='item'><h5 onclick='getAppointment("+item.appointmentID+")'>" + item.title +  "</h5> " +
         "<button class='btn btn-outline-danger btn-sm' onclick='deleteAppointment("+item.appointmentID+");$(this).parent().remove()'>X</button>" +
-        "<p>"+item.location+"</p><p>Vote until: "+item.dueDate+"</p></div>");
+        "<p>"+item.location+"</p>" + valid +"</div>");
 
 }
 
@@ -109,7 +115,7 @@ function createDetailView(item, appointmentID) {
 
     /**add date options*/
     if (item.dates.length > 0) {
-   /*     let vote = "";
+        let vote = "";
         if (item.votes.length > 0) {
             let voteCount = 0;
             item.votes.forEach((vote) => {
@@ -119,7 +125,7 @@ function createDetailView(item, appointmentID) {
 
             vote = "Votes: "+ voteCount;
 
-        }*/
+        }
         item.dates.forEach((date) => $("#vote_options").append("<input type='radio' name='vote' id=date'"
             + date.dateID +"' value='"+ date.dateID+ "'><label for='date"+ date.dateID
             +"'>" +date.startDate+ " - "+ date.endDate+"</label><br>"));
@@ -131,6 +137,12 @@ function createDetailView(item, appointmentID) {
     if($("#comment").val() != "") {
         $("#submitComment").click(() => addComment(appointmentID, $("#user").val(), $("#new_comment").val()));
     }
+
+
+    if (Date.now() > Date.parse(item.dueDate)) {
+        $("#details").children().attr('disabled', true);
+    }
+
 }
 
 function addComment(appointmentID, user, comment){
@@ -220,16 +232,16 @@ function addDateOption() {
 
 function loadDateForm(){
     $("#dates").append(
-        "<br><label htmlFor='dateOption'>Date Option</label><br>"+
+        "<br><label for='dateOption'>Date Option</label><br>"+
         "<input type='date' id='dateOption'><br>"+
-        "<label htmlFor='startTime'>Start Time</label><br>"+
+        "<label for='startTime'>Start Time</label><br>"+
         "<input type='time' id='startTime'><br>"+
-        "<label htmlFor='endTime'>End Time</label><br>"+
+        "<label for='endTime'>End Time</label><br>"+
         "<input type='time' id='endTime'>"+
         "<button id='addDate' className='btn btn-outline-success'>Add Date</button><br>"+ // BUTTON add date
         "<button id='submitNewAppointment' className='btn btn-outline-success'>Submit</button><br>"+ //BUTTON submit
         "<button id='cancel' className='btn btn-outline-danger'>Cancel</button><br>" + //BUTTON cancel
-        "<div className='col-sm' id='dateList'><br></div>");
+        "<div class='col-sm' id='dateList'><br></div>");
 
     $("#cancel").click(()=>{
         back();
