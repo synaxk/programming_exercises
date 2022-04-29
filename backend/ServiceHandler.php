@@ -3,6 +3,8 @@ require_once "db/DataHandler.php";
 require_once "businessLogic/AppointmentHandler.php";
 require_once "models/Appointment.php";
 
+/**ServiceHandler API*/
+
 /**AppointmentHandler controls read and store methods*/
 $ah = new AppointmentHandler();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {

@@ -20,6 +20,11 @@ class AppointmentHandler {
 
         $dh->changeTable('date');
         $dates = $dh->selectAll("appointmentID=$appointmentID");
+        foreach($dates as $key => $date) {
+            $dh->changeTable('vote');
+            $votes = $dh->selectCount("dateID={$date['dateID']} AND appointmentID=$appointmentID")[0];
+            $dates[$key]['votes'] = $votes['count'];
+        }
         $appointment->setDates($dates);
 
         $dh->changeTable('vote');
@@ -51,14 +56,15 @@ class AppointmentHandler {
 
     public function delete($appointmentID){
         /**delete relations*/
-        $dh = new DataHandler('date');
+        /**start with votes to remove "used" (FK -Dates in vote table) dates*/
+        $dh = new DataHandler('vote');
+        $dh->delete("appointmentID=$appointmentID");
+
+        $dh->changeTable('date');
         $dh->delete("appointmentID=$appointmentID");
 
         $dh->changeTable('comment');
         $dh->delete("appointmentID=$appointmentID");
-
-        $dh->changeTable('vote');
-        $dh->delete("appointmentID=$appointmentID'");
 
         /**delete Appointment*/
         $dh->changeTable('appointment');

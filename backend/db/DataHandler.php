@@ -5,7 +5,7 @@ class DataHandler {
     private $table;
 
     public function __construct($table) {
-        $this->sqlConnection = new mysqli("localhost", "svc_appointmentfinder","MyPassword!","appointmentfinder");
+        $this->sqlConnection = new mysqli("localhost", "svc_appointmentfinder", "MyPassword!", "appointmentfinder");
         $this->table = $table;
     }
 
@@ -28,6 +28,19 @@ class DataHandler {
         return $data;
     }
 
+    public function selectCount($whereClause = "") {
+        $query = "SELECT COUNT(*) as count FROM $this->table";
+        if ($whereClause !== "") {
+            $query .= " WHERE " . $whereClause;
+        }
+        $result = $this->sqlConnection->query($query);
+        $data = [];
+        while ($row = $result->fetch_assoc()) {
+            $data[] = $row;
+        }
+        return $data;
+    }
+
     /**generic database insert*/
     public function insert($data) {
         $columns = "";
@@ -40,7 +53,7 @@ class DataHandler {
         foreach ($data as $key => $value) {
             $columns .= $key . ",";
             $valuePlaceHolder .= "?,";
-            if (preg_match('/.*ID/',$key)) {
+            if (preg_match('/.*ID/', $key)) {
                 $paramPlaceHolder .= 'i';
             } else {
                 $paramPlaceHolder .= 's';

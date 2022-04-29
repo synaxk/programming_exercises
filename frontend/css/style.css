@@ -1,5 +1,5 @@
 body{
-    background: whitesmoke;
+    background: white;
     color: #273b16;
     margin: 2vh;
     padding: 2vh;
@@ -19,3 +19,4 @@ div{
 .brt {
     text-align: right;
 }
+

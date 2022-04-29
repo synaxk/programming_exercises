@@ -51,32 +51,37 @@ function getAppointment(appointmentID) {
 }
 
 /**send vote request to api*/
-function submitVote($appointmentID){
+function submitVote(appointmentID){
     let voteInput = {
-        "appointmentID": $appointmentID,
+        "appointmentID": appointmentID,
         "username": $("#user").val(),
         "dateID": $("input[name='vote']:checked").val()
     };
-
-    $.ajax({
-        url:"../backend/ServiceHandler.php",
-        type: "POST",
-        dataType: "json",
-        data: voteInput,
-        success: function(response) {
-            back();
-            console.log(response);
-        },
-        error: function(e){
-            console.log(this.data);
-        }
-    });
+    console.log(voteInput);
+    if (voteInput.username !== "" && !isNaN(voteInput.dateID)) {
+        console.log("voted!");
+        $.ajax({
+            url:"../backend/ServiceHandler.php",
+            type: "POST",
+            dataType: "json",
+            data: voteInput,
+            success: function(response) {
+                back();
+                getAppointment(appointmentID)
+                console.log(response);
+            },
+            error: function(e){
+                console.log(this.data);
+            }
+        });
+    }
 }
 
 /**add appointments to the list*/
 function addItemToList(item) {
     let valid = "<p>Vote until: "+item.dueDate+"</p>";
 
+    /**change color if expired*/
     if (Date.now() > Date.parse(item.dueDate)) {
         valid = "<p style='color:red'>Expired since: "+item.dueDate+"</p>";
     }
@@ -88,6 +93,7 @@ function addItemToList(item) {
 
 }
 
+/**send delete request to api*/
 function deleteAppointment(appointmentID) {
     $.ajax({
         url:"../backend/ServiceHandler.php",
@@ -105,31 +111,29 @@ function deleteAppointment(appointmentID) {
 function createDetailView(item, appointmentID) {
     $("#list").hide(); //funktioniert nicht wenn vorher detail
     console.log(item);
+
+    let valid = "<p>Vote until: "+item.dueDate+"</p>";
+    /**change color if expired*/
+    if (Date.now() > Date.parse(item.dueDate)) {
+        valid = "<p style='color:red'>Expired since: "+item.dueDate+"</p>";
+    }
+
     /**create detail view of appointment*/
     $("#details").prepend("<h4>"+ item.title+" </h4><p>"+item.location+"</p>" +
-        "<p>Vote until: "+item.dueDate+"</p><div id='vote_options' ><h6>Please choose a date</h6></div>" +
+        valid + "<div id='vote_options' ><h6>Please choose a date</h6></div>" +
         "<label for='user'>Username:</label><br><input id='user' type='text'/>" +
         "<button class='btn btn-outline-success' onclick='submitVote("+appointmentID+")'>Vote</button>" +
-        "<div id='comments'>Comments:</div>").show();
+        "<div id='comments'><h6>Comments:</h6></div>").show();
     $("#details").append("<label for='comment'>Comment</label><br><textarea id='new_comment'>"+
         "</textarea><br><button class='btn btn-outline-success' id='submitComment'>Submit Comment</button>");
 
     /**add date options*/
     if (item.dates.length > 0) {
         let vote = "";
-        if (item.votes.length > 0) {
-            let voteCount = 0;
-            item.votes.forEach((vote) => {
-                console.log(item.dates);
 
-            });
-
-            vote = "Votes: "+ voteCount;
-
-        }
         item.dates.forEach((date) => $("#vote_options").append("<input type='radio' name='vote' id=date'"
             + date.dateID +"' value='"+ date.dateID+ "'><label for='date"+ date.dateID
-            +"'>" +date.startDate+ " - "+ date.endDate+"</label><br>"));
+            +"'> " +date.startDate+ " - "+ date.endDate+ "       "+ date.votes+"</label><br>"));
     }
 
     item.comments.forEach((comment) => $("#comments").append("<div>"+ comment.username +": "+ comment.text +"</div>"));
@@ -138,34 +142,47 @@ function createDetailView(item, appointmentID) {
     if($("#comment").val() != "") {
         $("#submitComment").click(() => addComment(appointmentID, $("#user").val(), $("#new_comment").val()));
     }
-
-
+    /**If duedate expired -> disable input and set final date*/
     if (Date.now() > Date.parse(item.dueDate)) {
         $("#details").children().attr('disabled', true);
-    }
+        $("#vote_options").empty();
+        let maxVote = 0;
+        let voted = "";
+        item.dates.forEach((date) => {
+            if (date.votes >= maxVote) {
+                maxVote = date.votes;
+                voted = date;
+            }
+        });
 
+        $("#vote_options").append("<p>Date: "+ voted.startDate + " - " + voted.endDate+"</p>");
+
+    }
 }
 
+/**submit comment*/
 function addComment(appointmentID, user, comment){
     let newComment = {
         "username": user,
         "appointmentID": appointmentID,
         "text": comment
     };
-    $.ajax({
-        url:"../backend/ServiceHandler.php",
-        type: "POST",
-        dataType: "json",
-        data: newComment,
-        success: function(response) {
-            back();
-            console.log(response);
-        },
-        error: function(e){
-            console.log("tsetetstsetset");
-        }
-    });
-
+    if (newComment.username !== "" && newComment.text !== "") {
+        $.ajax({
+            url:"../backend/ServiceHandler.php",
+            type: "POST",
+            dataType: "json",
+            data: newComment,
+            success: function(response) {
+                back();
+                getAppointment(appointmentID);
+                console.log(response);
+            },
+            error: function(e){
+                console.log("comment error");
+            }
+        });
+    }
 }
 
 function createNewAppointment(){
@@ -190,13 +207,14 @@ function createNewAppointment(){
             data: createAppointmentObject(),
             success: function(response) {
                 console.log(response);
-                $("#newAppointment").empty().hide();
+                back();
                 getAppointments();
             }
         });
     });
 }
 
+/**Create Appointment-Object for post request*/
 function createAppointmentObject(){
     let dates = [];
     $("#dateList").children(".dateValue").each((index, item) => {
@@ -219,8 +237,8 @@ function createAppointmentObject(){
     return newAppointment;
 }
 
-//when creating a new appointment -> add as many date options as you like
-//appends input from date input fields + button with onclick to remove dateOption from list
+/**when creating a new appointment -> add as many date options as you like
+appends input from date input fields + button with onclick to remove dateOption from list*/
 
 function addDateOption() {
     if($("#dateOption").val() != "" && $("#startTime").val()) {
@@ -231,6 +249,7 @@ function addDateOption() {
     }
 }
 
+/**create date and time picker for date options*/
 function loadDateForm(){
     $("#dates").append(
         "<br><label for='dateOption'>Date Option</label><br>"+
@@ -239,9 +258,9 @@ function loadDateForm(){
         "<input type='time' id='startTime'><br>"+
         "<label for='endTime'>End Time</label><br>"+
         "<input type='time' id='endTime'>"+
-        "<button id='addDate' className='btn btn-outline-success'>Add Date</button><br>"+ // BUTTON add date
-        "<button id='submitNewAppointment' className='btn btn-outline-success'>Submit</button><br>"+ //BUTTON submit
-        "<button id='cancel' className='btn btn-outline-danger'>Cancel</button><br>" + //BUTTON cancel
+        "<button id='addDate' class='btn btn-outline-success'>Add Date</button><br>"+ // BUTTON add date
+        "<button id='submitNewAppointment' class='btn btn-outline-success'>Submit</button><br>"+ //BUTTON submit
+        "<button id='cancel' class='btn btn-outline-danger'>Cancel</button><br>" + //BUTTON cancel
         "<div class='col-sm' id='dateList'><br></div>");
 
     $("#cancel").click(()=>{
@@ -252,6 +271,7 @@ function loadDateForm(){
     $("#addDate").click(()=> addDateOption());
 }
 
+/**New Appointment*/
 function loadNewAppointmentForm(){
     $("#newAppointment").append(
         "<h3>New Appointment</h3><br>"+
