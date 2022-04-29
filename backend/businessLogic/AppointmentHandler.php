@@ -8,18 +8,28 @@ class AppointmentHandler {
     }
 
 
+    /**get a list of appointments*/
     public function getAppointments() {
+        /**init datahandler with tablename to select the data from*/
         $dh = new DataHandler('appointment');
         return $dh->selectAll();
     }
 
+    /**get one specific appointment with relational data
+        + dates
+        + votes
+        + comments*/
     public function getAppointmentDetails($appointmentID) {
+
+        /**Select Appointment and create new Appointment Object*/
         $dh = new DataHandler('appointment');
-        $data = $dh->selectAll("appointmentID=$appointmentID")[0];
+        $data = $dh->selectAll("appointmentID=$appointmentID")[0]; //[0] because the function returns an array
         $appointment = new Appointment($data['appointmentID'], $data['title'], $data['location'], $data['dueDate']);
 
+        /**change table to select dates*/
         $dh->changeTable('date');
         $dates = $dh->selectAll("appointmentID=$appointmentID");
+        /**loop through dates and add voteCount*/
         foreach($dates as $key => $date) {
             $dh->changeTable('vote');
             $votes = $dh->selectCount("dateID={$date['dateID']} AND appointmentID=$appointmentID")[0];
@@ -27,6 +37,7 @@ class AppointmentHandler {
         }
         $appointment->setDates($dates);
 
+        /***/
         $dh->changeTable('vote');
         $votes = $dh->selectAll("appointmentID=$appointmentID");
         $appointment->setVotes($votes);
@@ -34,6 +45,7 @@ class AppointmentHandler {
         $dh->changeTable('comment');
         $comments = $dh->selectAll("appointmentID=$appointmentID");
         $appointment->setComments($comments);
+
         return $appointment;
     }
 
@@ -55,7 +67,7 @@ class AppointmentHandler {
     }
 
     public function delete($appointmentID){
-        /**delete relations*/
+        /**delete dependencies*/
         /**start with votes to remove "used" (FK -Dates in vote table) dates*/
         $dh = new DataHandler('vote');
         $dh->delete("appointmentID=$appointmentID");

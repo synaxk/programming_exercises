@@ -7,6 +7,8 @@ require_once "models/Appointment.php";
 
 /**AppointmentHandler controls read and store methods*/
 $ah = new AppointmentHandler();
+
+/**post requests for new votes, comments, appointment and delet */
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST["appointmentID"])) {
         if (isset($_POST["dateID"])) {
@@ -22,15 +24,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
     } else {
+        /**if appointmentID is not set -> create new appointment*/
         $ah->createAppointment($_POST);
         echo json_encode("Appointment created successfully.");
     }
-
     /**Get Appointment-Detail or List of Appointments*/
 } elseif ($_SERVER["REQUEST_METHOD"] == "GET") {
     if (isset($_GET["id"])) {
         $appointment_ID = $_GET["id"];
         $appointment = $ah->getAppointmentDetails($appointment_ID);
+        /**create json from appoint array(getData)*/
         echo json_encode($appointment->getData());
     } else {
         $data = $ah->getAppointments();
