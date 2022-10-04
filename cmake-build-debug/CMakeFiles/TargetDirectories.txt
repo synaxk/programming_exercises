@@ -1,3 +1,0 @@
-/Users/alex/Documents/FHTW/03_Semester/VERTS/myfind/cmake-build-debug/CMakeFiles/myfind.dir
-/Users/alex/Documents/FHTW/03_Semester/VERTS/myfind/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/alex/Documents/FHTW/03_Semester/VERTS/myfind/cmake-build-debug/CMakeFiles/rebuild_cache.dir
