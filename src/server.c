@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
+#include <dirent.h>
 
 #define BUF 1024
 #define PORT 6543
@@ -15,16 +16,20 @@ int abortRequested = 0;
 int create_socket = -1;
 int new_socket = -1;
 
+enum mailCommand { Quit = 0, Send = 1, List = 2, Read = 3, Del = 4};
 /**Functions*/
 void signalHandler(int sig);
 void clientCommunication(void *data);
 void initServerSocket();
+int receiveClientCommand(int *current_socket, char *buffer);
+int respondToClient(int *current_socket, char *message);
 
 /**TWMailer Protocol Functions*/
-int send(char *sender, char *receiver, char * subject, char *message);
-int list(char *username);
-int read(char *username, int number);
-int del(char *username, int number);
+enum mailCommand getMailCommand(char *buffer);
+int sendMail(char *sender, char *receiver, char * subject, char *message);
+int listMails(char *username, char *buffer); //read directory /var/mail/USERNAME and send output to client
+int readMail(char *username, int number); // read file from /var/mail/USERNAME/FILENUMBERFROMLIST and send output to client
+int deleteMail(char *username, int number); // del file /var/mail/USERNAME/FILENUMBERFROMLIST
 
 int main (int argc, char **argv) {
     socklen_t addrlen;
@@ -109,20 +114,30 @@ int main (int argc, char **argv) {
 void clientCommunication(void *data) {
     char buffer[BUF];
     int *current_socket = (int *) data;
+    char username[9];
 
     strcpy(buffer, "Welcome to myserver!\r\nPlease enter your commands...\r\n");
     if (send(*current_socket, buffer, strlen(buffer), 0) == -1) {
         perror("send failed");
-        return NULL;
+        return;
     }
 
     do {
-        receiveClientCommand(current_socket, buffer, command) ;
+        receiveClientCommand(current_socket, buffer);
+        enum mailCommand cmd = getMailCommand(buffer);
 
-        if (send(*current_socket, "OK", 3, 0) == -1) {
-            perror("send answer failed");
-            return NULL;
+        switch (cmd) {
+            case List:
+                receiveClientCommand(current_socket, username);
+                listMails(username, buffer);
+                break;
+            default:
+                break;
         }
+
+        respondToClient(current_socket, "Halllo");
+
+
     } while (strcmp(buffer, "quit") != 0 && !abortRequested);
 
     // closes/frees the descriptor if not already
@@ -137,6 +152,70 @@ void clientCommunication(void *data) {
     }
 }
 
+enum mailCommand getMailCommand(char *buffer) {
+    if (strcmp(buffer,"LIST")) {
+        return List;
+    }
+}
+
+int listMails(char *username, char *buffer) {
+    DIR *dir;
+    struct dirent *ent;
+    char *path = "/var/mail/";
+    strcat(path, username);
+    buffer[0] = '\0';
+    char tmpBuffer[256];
+    if ((dir = opendir(path)) != NULL) {
+        /* print all the files and directories within directory */
+        for (int i = 1; (ent = readdir (dir)) != NULL; i++) {
+            sprintf(tmpBuffer, "%d %s\n", i, ent->d_name);
+            strcat(buffer, tmpBuffer);
+        }
+        closedir (dir);
+    } else {
+        /* could not open directory */
+        perror ("brbr");
+        return EXIT_FAILURE;
+    }
+}
+
+int receiveClientCommand(int *current_socket, char *buffer) {
+    int size;
+    size = recv(*current_socket, buffer, BUF - 1, 0);
+    if (size == -1) {
+        if (abortRequested) {
+            perror("recv error after aborted");
+        } else {
+            perror("recv error");
+        }
+        printf("test1\n");
+        return -1;
+    }
+
+    if (size == 0) {
+        printf("Client closed remote socket\n"); // ignore error
+        return -1;
+    }
+
+    // remove ugly debug message, because of the sent newline of client
+    if (buffer[size - 2] == '\r' && buffer[size - 1] == '\n') {
+        size -= 2;
+    } else if (buffer[size - 1] == '\n') {
+        --size;
+    }
+
+    buffer[size] = '\0';
+
+    printf("Message received: %s\n", buffer); // ignore error
+
+}
+
+int respondToClient(int *current_socket, char *message) {
+    if (send(*current_socket, message, strlen(message), 0) == -1) {
+        perror("send answer failed");
+        return -1;
+    }
+}
 
 void signalHandler(int sig) {
     if (sig == SIGINT) {

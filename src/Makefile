@@ -8,11 +8,11 @@ CC=gcc
 CFLAGS=-g -Wall -std=c99
 
 rebuild: clean all
-all: ../bin/server ../client
+all: ../bin/server ../bin/client
 
 clean:
 	clear
-	rm -f ../bin* ../obj/*
+	rm -f ../bin/* ../obj/*
 
 ../obj/client.o: client.c
 	${CC} ${CFLAGS} -o ../obj/client.o client.c -c
