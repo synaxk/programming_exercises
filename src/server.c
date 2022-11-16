@@ -27,12 +27,13 @@ int respondToClient(int *current_socket, char *message);
 
 /**TWMailer Protocol Functions*/
 enum mailCommand getMailCommand(char *buffer);
-int sendMail(char *sender, char *receiver, char * subject, char *message);
+int sendMail(int *current_socket, char *buffer);
 int listMails(char *username, char *buffer); //read directory /var/mail/USERNAME and send output to client
 int readMail(char *username, char *number, char *listBuffer); // read file from /var/mail/USERNAME/FILENUMBERFROMLIST and send output to client
 int deleteMail(char *username, char *number); // del file /var/mail/USERNAME/FILENUMBERFROMLIST
 char* getFileFromList(char *listBuffer, char *number, char *fileName);
 
+int writeToInbox(char *receiver, char *completeMessage);
 
 int main (int argc, char **argv) {
     socklen_t addrlen;
@@ -146,40 +147,15 @@ void clientCommunication(void *data) {
                 break;
 
             case Send:
-
-                char receiver[256];
-                char subject[256];
-                char message[256];
+                sendMail(current_socket, buffer); //return abfragen
                 
-                respondToClient(current_socket, "Enter your username");
-                strcpy(username, receiveClientCommand(current_socket, buffer));
-                
-                //////die vielleicht gleich in die Send funktion/// TODO
-                respondToClient(current_socket, "Enter Receiver");              //RECEIVER             
-                strcpy(receiver, receiveClientCommand(current_socket, buffer));
-                
-                respondToClient(current_socket, "Enter subject (80 char max)"); //SUBJECT
-                strcpy(subject, receiveClientCommand(current_socket, buffer));
-
-                respondToClient(current_socket, "Enter your message");          //MESSAGE
-                strcpy(message, receiveClientCommand(current_socket, buffer));
-
-                respondToClient(current_socket, "Enter '.' to send");           //PUNKT ???
-                if(strcmp(receiveClientCommand(current_socket, buffer), ".") == 0){
-                    sendMail(username, receiver, subject, message);
-                    respondToClient(current_socket, "Your mail was sent");
-                }
-                else{
-                    respondToClient(current_socket, "Your mail was not send");
-                }
-
                 break;
 
             case Read:
                 respondToClient(current_socket, "Enter username");
 
                 respondToClient(current_socket, "Enter message no.");
-                filename = getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), filename);
+                getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), filename);
                 break;
 
             case Del:
@@ -190,6 +166,7 @@ void clientCommunication(void *data) {
                 break;
 
             case Quit:
+
                 break;
 
 
@@ -272,19 +249,68 @@ int listMails(char *username, char *buffer) {
     }
 }
 
-int sendMail(char *sender, char *receiver, char * subject, char *message){
-    printf("TODO: implement sendMail()\n");
+int sendMail(int *current_socket, char *buffer){
+    char completeMessage[256];
+    completeMessage[0] = '\0';
+    char sender[256];
+    char receiver[256];
+    char input[256];
+
+                                                                    
+    respondToClient(current_socket, "Enter your username");          //SENDER
+    sprintf(sender, receiveClientCommand(current_socket, buffer));
+    strcat(completeMessage, "Sender: ");  
+    strcat(completeMessage, sender);
+    strcat(completeMessage, "\n");
+
+                                                                    
+    respondToClient(current_socket, "Enter Receiver");              //RECEIVER          
+    sprintf(receiver, receiveClientCommand(current_socket, buffer));             
+    strcat(completeMessage, "Receiver: ");  
+    strcat(completeMessage, receiver);
+    strcat(completeMessage, "\n");
+                
+    respondToClient(current_socket, "Enter subject (80 char max)"); //SUBJECT
+    sprintf(input, receiveClientCommand(current_socket, buffer));
+    strcat(completeMessage, "Subject: ");  
+    strcat(completeMessage, input);
+    strcat(completeMessage, "\n");
+
+    respondToClient(current_socket, "Enter your message");          //MESSAGE
+    sprintf(input, receiveClientCommand(current_socket, buffer));
+    strcat(completeMessage, "Message:\n");  
+    strcat(completeMessage, input);
+    strcat(completeMessage, "\n");
+
+    respondToClient(current_socket, "Enter '.' to send");           //PUNKT ???
+    if(strcmp(receiveClientCommand(current_socket, buffer), ".") == 0){
+        if(writeToInbox(receiver, completeMessage)){
+            return 1;
+        }
+        else{
+            return 0;
+        }
+    }else{
+        respondToClient(current_socket, "Your mail was not send");
+        return 0;
+    }
+
+
+
+
     return 0;
 }
 
-int readMail(char *username, char *number, char *listBuffer){
+int readMail(char *username, char *number, char *listBuffer) {
     FILE *mail;
     char filepath[256];
 
-    sprintf(filepath, "/var/mail/%s/")
-    mail = fopen("")
+    sprintf(filepath, "/var/mail/%s/");
     return 0;
+}
 
+int writeToInbox(char *receiver, char *completeMessage){
+    
 }
 
 int deleteMail(char *username, char *number){
@@ -293,7 +319,6 @@ int deleteMail(char *username, char *number){
 }
 
 char *receiveClientCommand(int *current_socket, char *buffer) {
-
     int size;
     size = recv(*current_socket, buffer, BUF - 1, 0);
     if (size == -1) {
@@ -357,9 +382,8 @@ void signalHandler(int sig) {
     }
 }
 
-char* getFileNumber(char *listBuffer, char *number, char* filename) {
+char* getFileFromList(char *listBuffer, char *number, char* filename) {
     char lineBuffer[256];
-
     size_t numLen = strlen(number);
 
     int c = 0;
@@ -371,7 +395,7 @@ char* getFileNumber(char *listBuffer, char *number, char* filename) {
         if (listBuffer[i] == '\n') {
             /// compare first byte of string
             if (strncmp(number, lineBuffer, numLen) == 0) {
-                lineBuffer += numLen;
+
                 strcpy(filename, lineBuffer);
                 return filename;
             }
