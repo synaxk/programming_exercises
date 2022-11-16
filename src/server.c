@@ -148,10 +148,11 @@ void clientCommunication(void *data) {
                 
                 respondToClient(current_socket, "Enter your username");
                 strcpy(username, receiveClientCommand(current_socket, buffer));
+                
                 //////die vielleicht gleich in die Send funktion/// TODO
                 respondToClient(current_socket, "Enter Receiver");              //RECEIVER             
                 strcpy(receiver, receiveClientCommand(current_socket, buffer));
-                 
+                
                 respondToClient(current_socket, "Enter subject (80 char max)"); //SUBJECT
                 strcpy(subject, receiveClientCommand(current_socket, buffer));
 
@@ -161,9 +162,10 @@ void clientCommunication(void *data) {
                 respondToClient(current_socket, "Enter '.' to send");           //PUNKT ???
                 if(strcmp(receiveClientCommand(current_socket, buffer), ".") == 0){
                     sendMail(username, receiver, subject, message);
+                    respondToClient(current_socket, "Your mail was sent");
                 }
                 else{
-                    respondToClient("Your mail was not send");
+                    respondToClient(current_socket, "Your mail was not send");
                 }
 
                 break;
@@ -267,15 +269,18 @@ int listMails(char *username, char *buffer) {
 
 int sendMail(char *sender, char *receiver, char * subject, char *message){
     printf("TODO: implement sendMail()\n");
+    return 0;
 }
 
 int readMail(char *username, int number){
     printf("TODO: implement readMail()\n");
+     return 0;
 
 }
 
 int deleteMail(char *username, int number){
      printf("TODO: implement deleteMail()\n");
+      return 0;
 }
 
 char *receiveClientCommand(int *current_socket, char *buffer) {
