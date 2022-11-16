@@ -17,25 +17,35 @@ int abortRequested = 0;
 int create_socket = -1;
 int new_socket = -1;
 
-enum mailCommand { Quit = 0, Send = 1, List = 2, Read = 3, Del = 4, Unknown = 5};
+enum mailCommand {
+    Quit = 0, Send = 1, List = 2, Read = 3, Del = 4, Unknown = 5
+};
+
 /**Functions*/
 void signalHandler(int sig);
+
 void clientCommunication(void *data);
+
 void initServerSocket();
+
 char *receiveClientCommand(int *current_socket, char *buffer);
+
 int respondToClient(int *current_socket, char *message);
 
 /**TWMailer Protocol Functions*/
 enum mailCommand getMailCommand(char *buffer);
+
 int sendMail(int *current_socket, char *buffer);
+
 int listMails(char *username, char *buffer); //read directory /var/mail/USERNAME and send output to client
-int readMail(char *username, char *number, char *listBuffer); // read file from /var/mail/USERNAME/FILENUMBERFROMLIST and send output to client
+int readMail(char *username, char *number,
+             char *listBuffer); // read file from /var/mail/USERNAME/FILENUMBERFROMLIST and send output to client
 int deleteMail(char *username, char *number); // del file /var/mail/USERNAME/FILENUMBERFROMLIST
-char* getFileFromList(char *listBuffer, char *number, char *fileName);
+char *getFileFromList(char *listBuffer, char *number, char *fileName);
 
 int writeToInbox(char *receiver, char *completeMessage);
 
-int main (int argc, char **argv) {
+int main(int argc, char **argv) {
     socklen_t addrlen;
     struct sockaddr_in address, cliaddress;
     int reuseValue = 1;
@@ -87,7 +97,7 @@ int main (int argc, char **argv) {
         addrlen = sizeof(struct sockaddr_in);
 
         ///accept connection
-        if ((new_socket = accept(create_socket, (struct sockaddr *) &cliaddress,&addrlen)) == -1) {
+        if ((new_socket = accept(create_socket, (struct sockaddr *) &cliaddress, &addrlen)) == -1) {
             if (abortRequested) {
                 perror("accept error after aborted");
             } else {
@@ -148,16 +158,15 @@ void clientCommunication(void *data) {
 
             case Send:
                 sendMail(current_socket, buffer); //return abfragen
-                
+
                 break;
 
             case Read:
                 respondToClient(current_socket, "Enter username");
-
+                strcpy(username, receiveClientCommand(current_socket, buffer));
                 respondToClient(current_socket, "Enter message no.");
                 getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), filename);
                 break;
-
             case Del:
                 respondToClient(current_socket, "Enter username");
 
@@ -170,7 +179,6 @@ void clientCommunication(void *data) {
                 break;
 
 
-            
             case Unknown:
                 respondToClient(current_socket, "Unknown command\n");
                 break;
@@ -192,22 +200,17 @@ void clientCommunication(void *data) {
 }
 
 enum mailCommand getMailCommand(char *buffer) {
-    if (strcmp(buffer,"LIST") == 0) {
+    if (strcmp(buffer, "LIST") == 0) {
         return List;
-    } 
-    else if(strcmp(buffer,"SEND") == 0){
+    } else if (strcmp(buffer, "SEND") == 0) {
         return Send;
-    }
-    else if(strcmp(buffer,"READ") == 0){
+    } else if (strcmp(buffer, "READ") == 0) {
         return Read;
-    }
-    else if(strcmp(buffer,"DEL") == 0){
+    } else if (strcmp(buffer, "DEL") == 0) {
         return Del;
-    }
-    else if(strcmp(buffer,"QUIT") == 0){
+    } else if (strcmp(buffer, "QUIT") == 0) {
         return Quit;
-    }
-    else {
+    } else {
         return Unknown;
     }
 }
@@ -232,7 +235,7 @@ int listMails(char *username, char *buffer) {
     if ((dir = opendir(path)) != NULL) {
         //
         /* print all the files and directories within directory */
-        for (int i = 1; (ent = readdir (dir)) != NULL;) {
+        for (int i = 1; (ent = readdir(dir)) != NULL;) {
             if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
                 continue;
             }
@@ -240,62 +243,59 @@ int listMails(char *username, char *buffer) {
             strcat(buffer, tmpBuffer);
             i++;
         }
-        closedir (dir);
+        closedir(dir);
         return 1;
     } else {
         /* could not open directory */
-        perror ("brbr");
+        perror("brbr");
         return EXIT_FAILURE;
     }
 }
 
-int sendMail(int *current_socket, char *buffer){
+int sendMail(int *current_socket, char *buffer) {
     char completeMessage[256];
     completeMessage[0] = '\0';
     char sender[256];
     char receiver[256];
     char input[256];
 
-                                                                    
+
     respondToClient(current_socket, "Enter your username");          //SENDER
     sprintf(sender, receiveClientCommand(current_socket, buffer));
-    strcat(completeMessage, "Sender: ");  
+    strcat(completeMessage, "Sender: ");
     strcat(completeMessage, sender);
     strcat(completeMessage, "\n");
 
-                                                                    
+
     respondToClient(current_socket, "Enter Receiver");              //RECEIVER          
-    sprintf(receiver, receiveClientCommand(current_socket, buffer));             
-    strcat(completeMessage, "Receiver: ");  
+    sprintf(receiver, receiveClientCommand(current_socket, buffer));
+    strcat(completeMessage, "Receiver: ");
     strcat(completeMessage, receiver);
     strcat(completeMessage, "\n");
-                
+
     respondToClient(current_socket, "Enter subject (80 char max)"); //SUBJECT
     sprintf(input, receiveClientCommand(current_socket, buffer));
-    strcat(completeMessage, "Subject: ");  
+    strcat(completeMessage, "Subject: ");
     strcat(completeMessage, input);
     strcat(completeMessage, "\n");
 
     respondToClient(current_socket, "Enter your message");          //MESSAGE
     sprintf(input, receiveClientCommand(current_socket, buffer));
-    strcat(completeMessage, "Message:\n");  
+    strcat(completeMessage, "Message:\n");
     strcat(completeMessage, input);
     strcat(completeMessage, "\n");
 
     respondToClient(current_socket, "Enter '.' to send");           //PUNKT ???
-    if(strcmp(receiveClientCommand(current_socket, buffer), ".") == 0){
-        if(writeToInbox(receiver, completeMessage)){
+    if (strcmp(receiveClientCommand(current_socket, buffer), ".") == 0) {
+        if (writeToInbox(receiver, completeMessage)) {
             return 1;
-        }
-        else{
+        } else {
             return 0;
         }
-    }else{
+    } else {
         respondToClient(current_socket, "Your mail was not send");
         return 0;
     }
-
-
 
 
     return 0;
@@ -309,13 +309,13 @@ int readMail(char *username, char *number, char *listBuffer) {
     return 0;
 }
 
-int writeToInbox(char *receiver, char *completeMessage){
-    
+int writeToInbox(char *receiver, char *completeMessage) {
+
 }
 
-int deleteMail(char *username, char *number){
-     printf("TODO: implement deleteMail()\n");
-      return 0;
+int deleteMail(char *username, char *number) {
+    printf("TODO: implement deleteMail()\n");
+    return 0;
 }
 
 char *receiveClientCommand(int *current_socket, char *buffer) {
@@ -382,11 +382,9 @@ void signalHandler(int sig) {
     }
 }
 
-char* getFileFromList(char *listBuffer, char *number, char* filename) {
-    char lineBuffer[256];
+char *getFileFromList(char *listBuffer, char *number, char *filename) {
+    char *lineBuffer = (char *) malloc(sizeof(char) * 256);
     size_t numLen = strlen(number);
-
-    int c = 0;
 
     for (int i = 1, j = 0; listBuffer[i] != '\0'; i++) {
         ///read current line into lineBuffer
@@ -395,7 +393,7 @@ char* getFileFromList(char *listBuffer, char *number, char* filename) {
         if (listBuffer[i] == '\n') {
             /// compare first byte of string
             if (strncmp(number, lineBuffer, numLen) == 0) {
-
+                lineBuffer += numLen;
                 strcpy(filename, lineBuffer);
                 return filename;
             }
