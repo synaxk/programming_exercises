@@ -32,6 +32,7 @@ int listMails(char *username, char *buffer); //read directory /var/mail/USERNAME
 int readMail(char *username, int number); // read file from /var/mail/USERNAME/FILENUMBERFROMLIST and send output to client
 int deleteMail(char *username, int number); // del file /var/mail/USERNAME/FILENUMBERFROMLIST
 
+char* buildMessageParts(char* title, char *input);
 int writeToInbox(char *receiver, char *completeMessage);
 
 int main (int argc, char **argv) {
@@ -297,8 +298,9 @@ int sendMail(int *current_socket, char *buffer){
     return 0;
 }
 
+
 int writeToInbox(char *receiver, char *completeMessage){
-    
+
 }
 
 int readMail(char *username, int number){
