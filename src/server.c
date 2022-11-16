@@ -42,7 +42,7 @@ int readMail(char *username, char *number, char *listBuffer); // read file from 
 int deleteMail(char *username, char *number); // del file /var/mail/USERNAME/FILENUMBERFROMLIST
 char *getFileFromList(char *listBuffer, char *number, char *fileName);
 char* buildMessageParts(char* completeMessage, char* title, char *input);
-int writeToInbox(char *receiver, char *completeMessage);
+int writeToInbox(char *receiver, char *completeMessage, char* subject);
 
 int main(int argc, char **argv) {
     socklen_t addrlen;
@@ -252,52 +252,53 @@ int listMails(char *username, char *buffer) {
 }
 
 int sendMail(int *current_socket, char *buffer) {
-    char completeMessage[256];
+    char completeMessage[BUF];
     completeMessage[0] = '\0';
     char sender[256];
     char receiver[256];
-    char input[256];
+    char subject[256];
+    char message[256];
 
 
     respondToClient(current_socket, "Enter your username");          //SENDER
     sprintf(sender, receiveClientCommand(current_socket, buffer));
-    strcat(completeMessage, "Sender: ");
-    strcat(completeMessage, sender);
-    strcat(completeMessage, "\n");
-
-
+    buildMessageParts(completeMessage, "Sender: ", sender);
+    
     respondToClient(current_socket, "Enter Receiver");              //RECEIVER          
     sprintf(receiver, receiveClientCommand(current_socket, buffer));
-    strcat(completeMessage, "Receiver: ");
-    strcat(completeMessage, receiver);
-    strcat(completeMessage, "\n");
-
+    buildMessageParts(completeMessage, "Receiver: ", receiver);
+    
     respondToClient(current_socket, "Enter subject (80 char max)"); //SUBJECT
-    sprintf(input, receiveClientCommand(current_socket, buffer));
-    strcat(completeMessage, "Subject: ");
-    strcat(completeMessage, input);
-    strcat(completeMessage, "\n");
+    sprintf(subject, receiveClientCommand(current_socket, buffer));
+    buildMessageParts(completeMessage, "Subject: ", subject);
 
     respondToClient(current_socket, "Enter your message");          //MESSAGE
-    sprintf(input, receiveClientCommand(current_socket, buffer));
-    strcat(completeMessage, "Message:\n");
-    strcat(completeMessage, input);
-    strcat(completeMessage, "\n");
+    sprintf(message, receiveClientCommand(current_socket, buffer));
+    buildMessageParts(completeMessage, "Message:\n", message);
+
 
     respondToClient(current_socket, "Enter '.' to send");           //PUNKT ???
+    //printf("%s", completeMessage); ///TEST
     if (strcmp(receiveClientCommand(current_socket, buffer), ".") == 0) {
-        if (writeToInbox(receiver, completeMessage)) {
+        //respondToClient(current_socket, "OK"); //TEST////////////////////////// message output
+        fflush(stdout);
+        printf("before writeToInbox");
+        fflush(stdout);
+         respondToClient(current_socket, "Your mail was send");
+       /* if (writeToInbox(receiver, completeMessage, subject)) {
             return 1;
         } else {
             return 0;
-        }
+        }*/
     } else {
+        printf("in else");
         respondToClient(current_socket, "Your mail was not send");
         return 0;
+        
     }
 
 
-    return 0;
+    return 1;
 }
 
 char* buildMessageParts(char* completeMessage, char* title, char *input){
@@ -307,7 +308,31 @@ char* buildMessageParts(char* completeMessage, char* title, char *input){
 
 }
 
-int writeToInbox(char *receiver, char *completeMessage){
+int writeToInbox(char *receiver, char *completeMessage, char*subject){
+    printf("in writeToInbox()"); ///TEST
+    //making path to inbox of receiver
+    char path[256] = "/var/mail/";
+    strcat(path, receiver);
+    strcat(path, "/in/");
+
+   //check if directory(=mailbox) exists
+    struct stat st = {0};
+
+    if (stat(path, &st) == -1) {
+        printf("invalid path in 'writeToInbox");
+        return 0;
+        //directory gibts nicht
+    }
+
+    //concat for filename
+    strcat(path, subject);
+
+    //write to directory
+
+    FILE* mail;
+    mail = fopen(path, "w+");
+    fprintf(mail, completeMessage);
+    fclose(mail);
 
 }
 
@@ -319,13 +344,11 @@ int readMail(char *username, char *number, char *listBuffer) {
     return 0;
 }
 
-int writeToInbox(char *receiver, char *completeMessage) {
-
-}
 
 int deleteMail(char *username, char *number) {
     printf("TODO: implement deleteMail()\n");
     return 0;
+}
 
 char *receiveClientCommand(int *current_socket, char *buffer) {
 
