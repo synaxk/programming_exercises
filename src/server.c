@@ -33,7 +33,7 @@ int readMail(char *username, char *number, char *listBuffer); // read file from 
 int deleteMail(char *username, char *number); // del file /var/mail/USERNAME/FILENUMBERFROMLIST
 char* getFileFromList(char *listBuffer, char *number, char *fileName);
 
-char* buildMessageParts(char* title, char *input);
+char* buildMessageParts(char* completeMessage, char* title, char *input);
 int writeToInbox(char *receiver, char *completeMessage);
 
 int main (int argc, char **argv) {
@@ -260,6 +260,7 @@ int sendMail(int *current_socket, char *buffer){
                                                                     
     respondToClient(current_socket, "Enter your username");          //SENDER
     sprintf(sender, receiveClientCommand(current_socket, buffer));
+    buildMessageParts(completeMessage, "Sender ", sender);
     strcat(completeMessage, "Sender: ");  
     strcat(completeMessage, sender);
     strcat(completeMessage, "\n");
@@ -302,19 +303,23 @@ int sendMail(int *current_socket, char *buffer){
     return 0;
 }
 
-<<<<<<< HEAD
-=======
+char* buildMessageParts(char* completeMessage, char* title, char *input){
+    strcat(completeMessage, title);
+    strcat(completeMessage, input);
+    strcat(completeMessage, "\n");
+
+}
+
+int writeToInbox(char *receiver, char *completeMessage){
+
+}
+
 int readMail(char *username, char *number, char *listBuffer) {
     FILE *mail;
     char filepath[256];
 
     sprintf(filepath, "/var/mail/%s/");
     return 0;
-}
->>>>>>> 2757356ad91c1a7017a94b7da83f91fa49cb8ddc
-
-int writeToInbox(char *receiver, char *completeMessage){
-
 }
 
 int deleteMail(char *username, char *number){
@@ -323,6 +328,7 @@ int deleteMail(char *username, char *number){
 }
 
 char *receiveClientCommand(int *current_socket, char *buffer) {
+
     int size;
     size = recv(*current_socket, buffer, BUF - 1, 0);
     if (size == -1) {
