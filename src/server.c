@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -21,7 +22,7 @@ enum mailCommand { Quit = 0, Send = 1, List = 2, Read = 3, Del = 4, Unknown = 5}
 void signalHandler(int sig);
 void clientCommunication(void *data);
 void initServerSocket();
-int receiveClientCommand(int *current_socket, char *buffer);
+char *receiveClientCommand(int *current_socket, char *buffer);
 int respondToClient(int *current_socket, char *message);
 
 /**TWMailer Protocol Functions*/
@@ -132,10 +133,20 @@ void clientCommunication(void *data) {
             case List:
                 printf("\ntest case list\n");
                 respondToClient(current_socket, "Enter username");
+<<<<<<< HEAD
                 receiveClientCommand(current_socket, username);
                 printf("\nback in case\n");
                 printf("%d", strlen(username));
                 //listMails(username, buffer);
+=======
+                strcpy(username, receiveClientCommand(current_socket, buffer));
+                if (listMails(username, buffer)) {
+                    respondToClient(current_socket, buffer);
+                } else {
+                    respondToClient(current_socket, "Unknown Username");
+                }
+
+>>>>>>> a26f3553394826ceb2563b00ee96f926c0643051
                 break;
             case Unknown:
                 respondToClient(current_socket, "Unknown command\n");
@@ -170,15 +181,31 @@ int listMails(char *username, char *buffer) {
     struct dirent *ent;
     char path[256] = "/var/mail/";
     strcat(path, username);
+    strcat(path, "/in");
     buffer[0] = '\0';
     char tmpBuffer[256];
+
+    ///check if directory(=maiilbox) exists
+    struct stat st = {0};
+    if (stat(path, &st) == -1) {
+        ///gibts oder gibts nid
+        return 0;
+        //mkdir(path, 0700);
+    }
+
     if ((dir = opendir(path)) != NULL) {
+        //
         /* print all the files and directories within directory */
-        for (int i = 1; (ent = readdir (dir)) != NULL; i++) {
+        for (int i = 1; (ent = readdir (dir)) != NULL;) {
+            if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+                continue;
+            }
             sprintf(tmpBuffer, "%d %s\n", i, ent->d_name);
             strcat(buffer, tmpBuffer);
+            i++;
         }
         closedir (dir);
+        return 1;
     } else {
         /* could not open directory */
         perror ("brbr");
@@ -186,7 +213,8 @@ int listMails(char *username, char *buffer) {
     }
 }
 
-int receiveClientCommand(int *current_socket, char *buffer) {
+char *receiveClientCommand(int *current_socket, char *buffer) {
+
     int size;
     size = recv(*current_socket, buffer, BUF - 1, 0);
     if (size == -1) {
@@ -196,12 +224,10 @@ int receiveClientCommand(int *current_socket, char *buffer) {
             perror("recv error");
         }
         printf("test1\n");
-        return -1;
     }
 
     if (size == 0) {
         printf("Client closed remote socket\n"); // ignore error
-        return -1;
     }
 
     // remove ugly debug message, because of the sent newline of client
@@ -212,8 +238,8 @@ int receiveClientCommand(int *current_socket, char *buffer) {
     }
 
     buffer[size] = '\0';
-
     printf("Message received: %s\n", buffer); // ignore error
+    return buffer;
 }
 
 int respondToClient(int *current_socket, char *message) {

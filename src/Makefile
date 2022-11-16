@@ -5,8 +5,7 @@ CC=g++
 #
 # Compiler Flags
 #
-CFLAGS=-g -Wall
-
+CFLAGS=-g
 rebuild: clean all
 all: ../bin/server ../bin/client
 
