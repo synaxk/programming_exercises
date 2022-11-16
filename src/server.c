@@ -131,23 +131,62 @@ void clientCommunication(void *data) {
 
         switch (cmd) {
             case List:
-                printf("\ntest case list\n");
                 respondToClient(current_socket, "Enter username");
-<<<<<<< HEAD
-                receiveClientCommand(current_socket, username);
-                printf("\nback in case\n");
-                printf("%d", strlen(username));
-                //listMails(username, buffer);
-=======
                 strcpy(username, receiveClientCommand(current_socket, buffer));
                 if (listMails(username, buffer)) {
                     respondToClient(current_socket, buffer);
                 } else {
                     respondToClient(current_socket, "Unknown Username");
                 }
-
->>>>>>> a26f3553394826ceb2563b00ee96f926c0643051
                 break;
+
+            case Send:
+
+                char receiver[256];
+                char subject[256];
+                char message[256];
+                
+                respondToClient(current_socket, "Enter your username");
+                strcpy(username, receiveClientCommand(current_socket, buffer));
+                //////die vielleicht gleich in die Send funktion/// TODO
+                respondToClient(current_socket, "Enter Receiver");              //RECEIVER             
+                strcpy(receiver, receiveClientCommand(current_socket, buffer));
+                 
+                respondToClient(current_socket, "Enter subject (80 char max)"); //SUBJECT
+                strcpy(subject, receiveClientCommand(current_socket, buffer));
+
+                respondToClient(current_socket, "Enter your message");          //MESSAGE
+                strcpy(message, receiveClientCommand(current_socket, buffer));
+
+                respondToClient(current_socket, "Enter '.' to send");           //PUNKT ???
+                if(strcmp(receiveClientCommand(current_socket, buffer), ".") == 0){
+                    sendMail(username, receiver, subject, message);
+                }
+                else{
+                    respondToClient("Your mail was not send");
+                }
+
+                break;
+
+            case Read:
+                respondToClient(current_socket, "Enter username");
+
+                respondToClient(current_socket, "Enter message no.");
+
+                break;
+
+            case Del:
+                respondToClient(current_socket, "Enter username");
+
+                respondToClient(current_socket, "Enter message no.");
+
+                break;
+
+            case Quit:
+                break;
+
+
+            
             case Unknown:
                 respondToClient(current_socket, "Unknown command\n");
                 break;
@@ -171,7 +210,20 @@ void clientCommunication(void *data) {
 enum mailCommand getMailCommand(char *buffer) {
     if (strcmp(buffer,"LIST") == 0) {
         return List;
-    } else {
+    } 
+    else if(strcmp(buffer,"SEND") == 0){
+        return Send;
+    }
+    else if(strcmp(buffer,"READ") == 0){
+        return Read;
+    }
+    else if(strcmp(buffer,"DEL") == 0){
+        return Del;
+    }
+    else if(strcmp(buffer,"QUIT") == 0){
+        return Quit;
+    }
+    else {
         return Unknown;
     }
 }
@@ -211,6 +263,19 @@ int listMails(char *username, char *buffer) {
         perror ("brbr");
         return EXIT_FAILURE;
     }
+}
+
+int sendMail(char *sender, char *receiver, char * subject, char *message){
+    printf("TODO: implement sendMail()\n");
+}
+
+int readMail(char *username, int number){
+    printf("TODO: implement readMail()\n");
+
+}
+
+int deleteMail(char *username, int number){
+     printf("TODO: implement deleteMail()\n");
 }
 
 char *receiveClientCommand(int *current_socket, char *buffer) {
