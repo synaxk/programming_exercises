@@ -29,8 +29,9 @@ int respondToClient(int *current_socket, char *message);
 enum mailCommand getMailCommand(char *buffer);
 int sendMail(int *current_socket, char *buffer);
 int listMails(char *username, char *buffer); //read directory /var/mail/USERNAME and send output to client
-int readMail(char *username, int number); // read file from /var/mail/USERNAME/FILENUMBERFROMLIST and send output to client
-int deleteMail(char *username, int number); // del file /var/mail/USERNAME/FILENUMBERFROMLIST
+int readMail(char *username, char *number, char *listBuffer); // read file from /var/mail/USERNAME/FILENUMBERFROMLIST and send output to client
+int deleteMail(char *username, char *number); // del file /var/mail/USERNAME/FILENUMBERFROMLIST
+char* getFileFromList(char *listBuffer, char *number, char *fileName);
 
 char* buildMessageParts(char* title, char *input);
 int writeToInbox(char *receiver, char *completeMessage);
@@ -119,6 +120,9 @@ void clientCommunication(void *data) {
     char buffer[BUF];
     int *current_socket = (int *) data;
     char username[9];
+    char listBuffer[BUF];
+    char filename[256];
+    int number = -1;
 
     strcpy(buffer, "Welcome to myserver!\r\nPlease enter your commands...\r\n");
     if (send(*current_socket, buffer, strlen(buffer), 0) == -1) {
@@ -152,7 +156,7 @@ void clientCommunication(void *data) {
                 respondToClient(current_socket, "Enter username");
 
                 respondToClient(current_socket, "Enter message no.");
-
+                getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), filename);
                 break;
 
             case Del:
@@ -298,24 +302,27 @@ int sendMail(int *current_socket, char *buffer){
     return 0;
 }
 
+<<<<<<< HEAD
+=======
+int readMail(char *username, char *number, char *listBuffer) {
+    FILE *mail;
+    char filepath[256];
+
+    sprintf(filepath, "/var/mail/%s/");
+    return 0;
+}
+>>>>>>> 2757356ad91c1a7017a94b7da83f91fa49cb8ddc
 
 int writeToInbox(char *receiver, char *completeMessage){
 
 }
 
-int readMail(char *username, int number){
-    printf("TODO: implement readMail()\n");
-     return 0;
-
-}
-
-int deleteMail(char *username, int number){
+int deleteMail(char *username, char *number){
      printf("TODO: implement deleteMail()\n");
       return 0;
 }
 
 char *receiveClientCommand(int *current_socket, char *buffer) {
-
     int size;
     size = recv(*current_socket, buffer, BUF - 1, 0);
     if (size == -1) {
@@ -376,5 +383,26 @@ void signalHandler(int sig) {
         }
     } else {
         exit(sig);
+    }
+}
+
+char* getFileFromList(char *listBuffer, char *number, char* filename) {
+    char lineBuffer[256];
+    size_t numLen = strlen(number);
+
+    int c = 0;
+
+    for (int i = 1, j = 0; listBuffer[i] != '\0'; i++) {
+        ///read current line into lineBuffer
+        lineBuffer[j] = listBuffer[i];
+        ///at newline, check if we need that line, else reset counter
+        if (listBuffer[i] == '\n') {
+            /// compare first byte of string
+            if (strncmp(number, lineBuffer, numLen) == 0) {
+
+                strcpy(filename, lineBuffer);
+                return filename;
+            }
+        }
     }
 }
