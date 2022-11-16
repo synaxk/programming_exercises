@@ -130,8 +130,10 @@ void clientCommunication(void *data) {
 
         switch (cmd) {
             case List:
-                printf("test case list\n");
-                receiveClientCommand(current_socket, username);
+                printf("\ntest case list\n");
+                respondToClient(current_socket, "Enter username");
+                receiveClientCommand(current_socket, buffer);
+                printf(buffer);
                 listMails(username, buffer);
                 break;
             case Unknown:
