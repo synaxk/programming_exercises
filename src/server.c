@@ -38,11 +38,10 @@ enum mailCommand getMailCommand(char *buffer);
 int sendMail(int *current_socket, char *buffer);
 
 int listMails(char *username, char *buffer); //read directory /var/mail/USERNAME and send output to client
-int readMail(char *username, char *number,
-             char *listBuffer); // read file from /var/mail/USERNAME/FILENUMBERFROMLIST and send output to client
+int readMail(char *username, char *number, char *listBuffer); // read file from /var/mail/USERNAME/FILENUMBERFROMLIST and send output to client
 int deleteMail(char *username, char *number); // del file /var/mail/USERNAME/FILENUMBERFROMLIST
 char *getFileFromList(char *listBuffer, char *number, char *fileName);
-
+char* buildMessageParts(char* completeMessage, char* title, char *input);
 int writeToInbox(char *receiver, char *completeMessage);
 
 int main(int argc, char **argv) {
@@ -301,6 +300,17 @@ int sendMail(int *current_socket, char *buffer) {
     return 0;
 }
 
+char* buildMessageParts(char* completeMessage, char* title, char *input){
+    strcat(completeMessage, title);
+    strcat(completeMessage, input);
+    strcat(completeMessage, "\n");
+
+}
+
+int writeToInbox(char *receiver, char *completeMessage){
+
+}
+
 int readMail(char *username, char *number, char *listBuffer) {
     FILE *mail;
     char filepath[256];
@@ -316,9 +326,9 @@ int writeToInbox(char *receiver, char *completeMessage) {
 int deleteMail(char *username, char *number) {
     printf("TODO: implement deleteMail()\n");
     return 0;
-}
 
 char *receiveClientCommand(int *current_socket, char *buffer) {
+
     int size;
     size = recv(*current_socket, buffer, BUF - 1, 0);
     if (size == -1) {
