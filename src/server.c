@@ -134,9 +134,12 @@ void clientCommunication(void *data) {
                 printf("\ntest case list\n");
                 respondToClient(current_socket, "Enter username");
                 strcpy(username, receiveClientCommand(current_socket, buffer));
-                respondToClient(current_socket, "Danke");
-                printf("Username: %s\n", username);
-                listMails(username, buffer);
+                if (listMails(username, buffer)) {
+                    respondToClient(current_socket, buffer);
+                } else {
+                    respondToClient(current_socket, "Unknown Username");
+                }
+
                 break;
             case Unknown:
                 respondToClient(current_socket, "Unknown command\n");
@@ -171,23 +174,31 @@ int listMails(char *username, char *buffer) {
     struct dirent *ent;
     char path[256] = "/var/mail/";
     strcat(path, username);
+    strcat(path, "/in");
     buffer[0] = '\0';
     char tmpBuffer[256];
 
-    ///check if directory(=mailbox) exists & create it if not xD
+    ///check if directory(=maiilbox) exists
     struct stat st = {0};
     if (stat(path, &st) == -1) {
-        mkdir(path, 0700);
+        ///gibts oder gibts nid
+        return 0;
+        //mkdir(path, 0700);
     }
 
     if ((dir = opendir(path)) != NULL) {
         //
         /* print all the files and directories within directory */
-        for (int i = 1; (ent = readdir (dir)) != NULL; i++) {
+        for (int i = 1; (ent = readdir (dir)) != NULL;) {
+            if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+                continue;
+            }
             sprintf(tmpBuffer, "%d %s\n", i, ent->d_name);
             strcat(buffer, tmpBuffer);
+            i++;
         }
         closedir (dir);
+        return 1;
     } else {
         /* could not open directory */
         perror ("brbr");
