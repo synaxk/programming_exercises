@@ -14,8 +14,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     int create_socket;
     char buffer[BUF];
     struct sockaddr_in address;
@@ -23,13 +22,7 @@ int main(int argc, char **argv)
     int isQuit;
 
     ////////////////////////////////////////////////////////////////////////////
-    // CREATE A SOCKET
-    // https://man7.org/linux/man-pages/man2/socket.2.html
-    // https://man7.org/linux/man-pages/man7/ip.7.html
-    // https://man7.org/linux/man-pages/man7/tcp.7.html
-    // IPv4, TCP (connection oriented), IP (same as server)
-    if ((create_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-    {
+    if ((create_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("Socket error");
         return EXIT_FAILURE;
     }
@@ -42,12 +35,9 @@ int main(int argc, char **argv)
     // https://man7.org/linux/man-pages/man3/htons.3.html
     address.sin_port = htons(PORT);
     // https://man7.org/linux/man-pages/man3/inet_aton.3.html
-    if (argc < 2)
-    {
+    if (argc < 2) {
         inet_aton("127.0.0.1", &address.sin_addr);
-    }
-    else
-    {
+    } else {
         inet_aton(argv[1], &address.sin_addr);
     }
 
@@ -55,9 +45,8 @@ int main(int argc, char **argv)
     // CREATE A CONNECTION
     // https://man7.org/linux/man-pages/man2/connect.2.html
     if (connect(create_socket,
-                (struct sockaddr *)&address,
-                sizeof(address)) == -1)
-    {
+                (struct sockaddr *) &address,
+                sizeof(address)) == -1) {
         // https://man7.org/linux/man-pages/man3/perror.3.html
         perror("Connect error - no server available");
         return EXIT_FAILURE;
@@ -71,34 +60,24 @@ int main(int argc, char **argv)
     // RECEIVE DATA
     // https://man7.org/linux/man-pages/man2/recv.2.html
     size = recv(create_socket, buffer, BUF - 1, 0);
-    if (size == -1)
-    {
+    if (size == -1) {
         perror("recv error");
-    }
-    else if (size == 0)
-    {
+    } else if (size == 0) {
         printf("Server closed remote socket\n"); // ignore error
-    }
-    else
-    {
+    } else {
         buffer[size] = '\0';
         printf("%s", buffer); // ignore error
     }
 
-    do
-    {
+    do {
         printf(">> ");
-        if (fgets(buffer, BUF, stdin) != NULL)
-        {
+        if (fgets(buffer, BUF, stdin) != NULL) {
             int size = strlen(buffer);
             // remove new-line signs from string at the end
-            if (buffer[size - 2] == '\r' && buffer[size - 1] == '\n')
-            {
+            if (buffer[size - 2] == '\r' && buffer[size - 1] == '\n') {
                 size -= 2;
                 buffer[size] = 0;
-            }
-            else if (buffer[size - 1] == '\n')
-            {
+            } else if (buffer[size - 1] == '\n') {
                 --size;
                 buffer[size] = 0;
             }
@@ -109,17 +88,8 @@ int main(int argc, char **argv)
             // https://man7.org/linux/man-pages/man2/send.2.html
             // send will fail if connection is closed, but does not set
             // the error of send, but still the count of bytes sent
-            if ((send(create_socket, buffer, size, 0)) == -1)
-            {
-                // in case the server is gone offline we will still not enter
-                // this part of code: see docs: https://linux.die.net/man/3/send
-                // >> Successful completion of a call to send() does not guarantee
-                // >> delivery of the message. A return value of -1 indicates only
-                // >> locally-detected errors.
-                // ... but
-                // to check the connection before send is sense-less because
-                // after checking the communication can fail (so we would need
-                // to have 1 atomic operation to check...)
+            if ((send(create_socket, buffer, size, 0)) == -1) {
+
                 perror("send error");
                 break;
             }
@@ -137,22 +107,16 @@ int main(int argc, char **argv)
             // solution 2: add an infrastructure component for messaging (broker)
             //
             size = recv(create_socket, buffer, BUF - 1, 0);
-            if (size == -1)
-            {
+            if (size == -1) {
                 perror("recv error");
                 break;
-            }
-            else if (size == 0)
-            {
+            } else if (size == 0) {
                 printf("Server closed remote socket\n"); // ignore error
                 break;
-            }
-            else
-            {
+            } else {
                 buffer[size] = '\0';
                 printf("<< %s\n", buffer); // ignore error
-                if (strcmp("OK", buffer) != 0)
-                {
+                if (strcmp("OK", buffer) != 0) {
                     fprintf(stderr, "<< Server error occured, abort\n");
                     break;
                 }
@@ -162,15 +126,12 @@ int main(int argc, char **argv)
 
     ////////////////////////////////////////////////////////////////////////////
     // CLOSES THE DESCRIPTOR
-    if (create_socket != -1)
-    {
-        if (shutdown(create_socket, SHUT_RDWR) == -1)
-        {
+    if (create_socket != -1) {
+        if (shutdown(create_socket, SHUT_RDWR) == -1) {
             // invalid in case the server is gone already
             perror("shutdown create_socket");
         }
-        if (close(create_socket) == -1)
-        {
+        if (close(create_socket) == -1) {
             perror("close create_socket");
         }
         create_socket = -1;

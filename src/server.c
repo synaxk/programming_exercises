@@ -16,7 +16,7 @@ int abortRequested = 0;
 int create_socket = -1;
 int new_socket = -1;
 
-enum mailCommand { Quit = 0, Send = 1, List = 2, Read = 3, Del = 4};
+enum mailCommand { Quit = 0, Send = 1, List = 2, Read = 3, Del = 4, Unknown = 5};
 /**Functions*/
 void signalHandler(int sig);
 void clientCommunication(void *data);
@@ -124,19 +124,21 @@ void clientCommunication(void *data) {
 
     do {
         receiveClientCommand(current_socket, buffer);
+        ///compare command strings
+        printf("%s", buffer);
         enum mailCommand cmd = getMailCommand(buffer);
 
         switch (cmd) {
             case List:
+                printf("test case list\n");
                 receiveClientCommand(current_socket, username);
                 listMails(username, buffer);
                 break;
-            default:
+            case Unknown:
+                respondToClient(current_socket, "Unknown command\n");
                 break;
+
         }
-
-        respondToClient(current_socket, "Halllo");
-
 
     } while (strcmp(buffer, "quit") != 0 && !abortRequested);
 
@@ -153,15 +155,17 @@ void clientCommunication(void *data) {
 }
 
 enum mailCommand getMailCommand(char *buffer) {
-    if (strcmp(buffer,"LIST")) {
+    if (strcmp(buffer,"LIST") == 0) {
         return List;
+    } else {
+        return Unknown;
     }
 }
 
 int listMails(char *username, char *buffer) {
     DIR *dir;
     struct dirent *ent;
-    char *path = "/var/mail/";
+    char path[256] = "/var/mail/";
     strcat(path, username);
     buffer[0] = '\0';
     char tmpBuffer[256];
@@ -207,7 +211,6 @@ int receiveClientCommand(int *current_socket, char *buffer) {
     buffer[size] = '\0';
 
     printf("Message received: %s\n", buffer); // ignore error
-
 }
 
 int respondToClient(int *current_socket, char *message) {
