@@ -1,11 +1,11 @@
 # Makefile for TWMailer
 #
 # Compiler
-CC=gcc
+CC=g++
 #
 # Compiler Flags
 #
-CFLAGS=-g -Wall -std=c99
+CFLAGS=-g -Wall
 
 rebuild: clean all
 all: ../bin/server ../bin/client
