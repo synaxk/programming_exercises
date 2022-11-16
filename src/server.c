@@ -132,9 +132,10 @@ void clientCommunication(void *data) {
             case List:
                 printf("\ntest case list\n");
                 respondToClient(current_socket, "Enter username");
-                receiveClientCommand(current_socket, buffer);
-                printf(buffer);
-                listMails(username, buffer);
+                receiveClientCommand(current_socket, username);
+                printf("\nback in case\n");
+                printf("%d", strlen(username));
+                //listMails(username, buffer);
                 break;
             case Unknown:
                 respondToClient(current_socket, "Unknown command\n");
