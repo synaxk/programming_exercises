@@ -38,7 +38,7 @@ enum mailCommand getMailCommand(char *buffer);
 int sendMail(int *current_socket, char *buffer);
 
 int listMails(char *username, char *buffer); //read directory /var/mail/USERNAME and send output to client
-int readMail(char *username, char *number, char *listBuffer); // read file from /var/mail/USERNAME/FILENUMBERFROMLIST and send output to client
+char *readMail(char *username, char *filename, char *buffer); // read file from /var/mail/USERNAME/FILENUMBERFROMLIST and send output to client
 int deleteMail(char *username, char *number); // del file /var/mail/USERNAME/FILENUMBERFROMLIST
 char *getFileFromList(char *listBuffer, char *number, char *fileName);
 char* buildMessageParts(char* completeMessage, char* title, char *input);
@@ -129,6 +129,7 @@ void clientCommunication(void *data) {
     int *current_socket = (int *) data;
     char username[9];
     char listBuffer[BUF];
+    char message[BUF];
     char filename[256];
     int number = -1;
 
@@ -165,7 +166,9 @@ void clientCommunication(void *data) {
                 strcpy(username, receiveClientCommand(current_socket, buffer));
                 respondToClient(current_socket, "Enter message no.");
                 strcpy(filename, getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), buffer));
-                respondToClient(current_socket, filename);
+                strcpy(message, readMail(username, filename, buffer));
+
+                respondToClient(current_socket, message);
                 break;
             case Del:
                 respondToClient(current_socket, "Enter username");
@@ -337,12 +340,30 @@ int writeToInbox(char *receiver, char *completeMessage, char*subject){
     fclose(mail);
 }
 
-int readMail(char *username, char *number, char *listBuffer) {
-    FILE *mail;
+char *readMail(char *username, char *filename, char *buffer) {
+    FILE *mail = NULL;
     char filepath[256];
+    char testBuffer[BUF];
 
-    sprintf(filepath, "/var/mail/%s/");
-    return 0;
+    sprintf(filepath, "/var/mail/%s/in/%s", username, filename);
+    printf("%s\n", filepath);
+
+    ///check if directory(=maiilbox) exists
+    struct stat st = {0};
+    if (stat(filepath, &st) == -1) {
+        ///gibts oder gibts nid
+        printf("filepath gibts nicht\n");
+        //mkdir(path, 0700);
+    }
+
+    if ((mail = fopen(filepath, "r+")) != NULL ) {
+        printf("sollte passen\n");
+    } else {
+        printf("cant open file\n");
+    }
+
+    fflush(stdout);
+
 }
 
 
