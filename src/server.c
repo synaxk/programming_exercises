@@ -141,7 +141,6 @@ void clientCommunication(void *data) {
     do {
         receiveClientCommand(current_socket, buffer);
         ///compare command strings
-        printf("%s", buffer);
         enum mailCommand cmd = getMailCommand(buffer);
 
         switch (cmd) {
@@ -149,6 +148,7 @@ void clientCommunication(void *data) {
                 respondToClient(current_socket, "Enter username");
                 strcpy(username, receiveClientCommand(current_socket, buffer));
                 if (listMails(username, buffer)) {
+                    strcpy(listBuffer, buffer);
                     respondToClient(current_socket, buffer);
                 } else {
                     respondToClient(current_socket, "Unknown Username");
@@ -164,7 +164,8 @@ void clientCommunication(void *data) {
                 respondToClient(current_socket, "Enter username");
                 strcpy(username, receiveClientCommand(current_socket, buffer));
                 respondToClient(current_socket, "Enter message no.");
-                getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), filename);
+                strcpy(filename, getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), buffer));
+                respondToClient(current_socket, filename);
                 break;
             case Del:
                 respondToClient(current_socket, "Enter username");
@@ -260,11 +261,7 @@ int sendMail(int *current_socket, char *buffer) {
 
 
     respondToClient(current_socket, "Enter your username");          //SENDER
-    sprintf(sender, receiveClientCommand(current_socket, buffer));
-    strcat(completeMessage, "Sender: ");
-    strcat(completeMessage, sender);
-    strcat(completeMessage, "\n");
-
+    sprintf(sender, "Sender: %s\n", receiveClientCommand(current_socket, buffer));
 
     respondToClient(current_socket, "Enter Receiver");              //RECEIVER          
     sprintf(receiver, receiveClientCommand(current_socket, buffer));
@@ -286,11 +283,11 @@ int sendMail(int *current_socket, char *buffer) {
 
     respondToClient(current_socket, "Enter '.' to send");           //PUNKT ???
     if (strcmp(receiveClientCommand(current_socket, buffer), ".") == 0) {
-        if (writeToInbox(receiver, completeMessage)) {
+      /*  if (writeToInbox(receiver, completeMessage)) {
             return 1;
         } else {
             return 0;
-        }
+        }*/
     } else {
         respondToClient(current_socket, "Your mail was not send");
         return 0;
@@ -304,11 +301,6 @@ char* buildMessageParts(char* completeMessage, char* title, char *input){
     strcat(completeMessage, title);
     strcat(completeMessage, input);
     strcat(completeMessage, "\n");
-
-}
-
-int writeToInbox(char *receiver, char *completeMessage){
-
 }
 
 int readMail(char *username, char *number, char *listBuffer) {
@@ -319,13 +311,11 @@ int readMail(char *username, char *number, char *listBuffer) {
     return 0;
 }
 
-int writeToInbox(char *receiver, char *completeMessage) {
-
-}
 
 int deleteMail(char *username, char *number) {
     printf("TODO: implement deleteMail()\n");
     return 0;
+}
 
 char *receiveClientCommand(int *current_socket, char *buffer) {
 
@@ -392,21 +382,25 @@ void signalHandler(int sig) {
     }
 }
 
-char *getFileFromList(char *listBuffer, char *number, char *filename) {
+char *getFileFromList(char *listBuffer, char *number, char *buffer) {
     char *lineBuffer = (char *) malloc(sizeof(char) * 256);
     size_t numLen = strlen(number);
 
+    printf("Listbuffer: %s", listBuffer);
+
     for (int i = 1, j = 0; listBuffer[i] != '\0'; i++) {
         ///read current line into lineBuffer
-        lineBuffer[j] = listBuffer[i];
+        lineBuffer[j++] = listBuffer[i];
         ///at newline, check if we need that line, else reset counter
         if (listBuffer[i] == '\n') {
+
             /// compare first byte of string
             if (strncmp(number, lineBuffer, numLen) == 0) {
-                lineBuffer += numLen;
-                strcpy(filename, lineBuffer);
-                return filename;
+                lineBuffer += (numLen+1);
+                strcpy(buffer, lineBuffer);
+                return buffer;
             }
+            j = 0;
         }
     }
 }
