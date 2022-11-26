@@ -39,7 +39,7 @@ int sendMail(int *current_socket, char *buffer);
 
 int listMails(char *username, char *buffer); //read directory /var/mail/USERNAME and send output to client
 char *readMail(char *username, char *filename, char *buffer); // read file from /var/mail/USERNAME/FILENUMBERFROMLIST and send output to client
-int deleteMail(char *username, char *number); // del file /var/mail/USERNAME/FILENUMBERFROMLIST
+int deleteMail(char *username, char *filename); // del file /var/mail/USERNAME/FILENUMBERFROMLIST
 char *getFileFromList(char *listBuffer, char *number, char *fileName);
 
 int writeToInAndOutBox(char *receiver, char *completeMessage, char*subject, char* inOrOut);
@@ -165,16 +165,19 @@ void clientCommunication(void *data) {
                 respondToClient(current_socket, "Enter username");
                 strcpy(username, receiveClientCommand(current_socket, buffer));
                 respondToClient(current_socket, "Enter message no.");
-                strcpy(filename, getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), buffer));
+                getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), filename);
+
+                printf("Current Buffer: %s\n", filename );
                 strcpy(message, readMail(username, filename, buffer));
 
                 respondToClient(current_socket, message);
                 break;
             case Del:
                 respondToClient(current_socket, "Enter username");
+                strcpy(username, receiveClientCommand(current_socket, buffer));
 
                 respondToClient(current_socket, "Enter message no.");
-
+                deleteMail(username, )
                 break;
 
             case Quit:
@@ -335,32 +338,25 @@ int writeToInAndOutBox(char *receiver, char *completeMessage, char*subject, char
 char *readMail(char *username, char *filename, char *buffer) {
     FILE *mail = NULL;
     char filepath[256];
-    char testBuffer[BUF];
-
+    char testBuffer[200];
     sprintf(filepath, "/var/mail/%s/in/%s", username, filename);
     printf("%s\n", filepath);
 
-    ///check if directory(=maiilbox) exists
-    struct stat st = {0};
-    if (stat(filepath, &st) == -1) {
-        ///gibts oder gibts nid
-        printf("filepath gibts nicht\n");
-        //mkdir(path, 0700);
-    }
+    strcpy(testBuffer, filepath);
 
-    if ((mail = fopen(filepath, "r+")) != NULL ) {
-        printf("sollte passen\n");
-    } else {
-        printf("cant open file\n");
-    }
+    mail = fopen((char*)filepath, "r");
 
-    fflush(stdout);
+    fgets(buffer, 200, mail);
 
+    return buffer;
 }
 
 
-int deleteMail(char *username, char *number) {
-    printf("TODO: implement deleteMail()\n");
+int deleteMail(char *username, char *filename) {
+    char filepath[256];
+    sprintf(filepath, "/var/mail/%s/in/%s", username, filename);
+
+    remove(filepath);
     return 0;
 }
 
@@ -434,7 +430,7 @@ char *getFileFromList(char *listBuffer, char *number, char *buffer) {
 
     printf("Listbuffer: %s", listBuffer);
 
-    for (int i = 1, j = 0; listBuffer[i] != '\0'; i++) {
+    for (int i = 0, j = 0; listBuffer[i] != '\0'; i++) {
         ///read current line into lineBuffer
         lineBuffer[j++] = listBuffer[i];
         ///at newline, check if we need that line, else reset counter
@@ -442,9 +438,11 @@ char *getFileFromList(char *listBuffer, char *number, char *buffer) {
 
             /// compare first byte of string
             if (strncmp(number, lineBuffer, numLen) == 0) {
+                lineBuffer[j-1] = '\0';
                 lineBuffer += (numLen+1);
                 strcpy(buffer, lineBuffer);
-                return buffer;
+                printf("filenamebuffer%s\n", buffer);
+                fflush(stdout);
             }
             j = 0;
         }
