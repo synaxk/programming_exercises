@@ -1,7 +1,7 @@
 # Makefile for TWMailer
 #
 # Compiler
-CC=g++
+CC=gcc
 #
 # Compiler Flags
 #

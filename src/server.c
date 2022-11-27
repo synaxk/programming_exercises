@@ -1,4 +1,3 @@
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
@@ -23,37 +22,101 @@ enum mailCommand {
 
 /**Functions*/
 void signalHandler(int sig);
-
 void clientCommunication(void *data);
+char *receiveClientCommand(const int *current_socket, char *buffer);
+int respondToClient(const int *current_socket, char *message);
+int initServerSocket(struct sockaddr_in *address);
 
-void initServerSocket();
 
-char *receiveClientCommand(int *current_socket, char *buffer);
+/**get user credentials and send auth request*/
+int login();
 
-int respondToClient(int *current_socket, char *message);
+/**send authentication request to ldap server*/
+int authRequest(char *username, char*password);
 
-/**TWMailer Protocol Functions*/
+/**parse command from client*/
 enum mailCommand getMailCommand(char *buffer);
 
+/**Get Mail-params from client, build and distribute the message*/
 int sendMail(int *current_socket, char *buffer);
 
-int listMails(char *username, char *buffer); //read directory /var/mail/USERNAME and send output to client
-char *readMail(char *username, char *filename, char *buffer); // read file from /var/mail/USERNAME/FILENUMBERFROMLIST and send output to client
-int deleteMail(char *username, char *filename); // del file /var/mail/USERNAME/FILENUMBERFROMLIST
-char *getFileFromList(char *listBuffer, char *number, char *fileName);
+/**read directory /var/mail/USERNAME/in and send output to client*/
+int listMails(char *username, char *buffer);
 
-int writeToInAndOutBox(char *receiver, char *completeMessage, char*subject, char* inOrOut);
+/**read file from /var/mail/USERNAME/in/ and send output to client*/
+char *readMail(char *username, char *filename, char *buffer);
+
+/**delete file /var/mail/USERNAME/in/FILENAME*/
+int deleteMail(char *username, char *filename);
+
+/**select filename from '\n' seperated list of filenames and trim leading number*/
+void getFileFromList(const char *listBuffer, char *number, char *buffer);
+
+/**Construct message and write file (name = subject) to /var/mail/USERNAME/*/
+int writeToInAndOutBox(char *username, char *completeMessage, char*subject, char* inOrOut);
+
 
 int main(int argc, char **argv) {
-    socklen_t addrlen;
-    struct sockaddr_in address, cliaddress;
-    int reuseValue = 1;
+    socklen_t addrLen;
+    struct sockaddr_in address, cliAddress;
+    int pid = 1;
 
-    ///hm ka wofür wir das brauchen
+    ///signal listener
     if (signal(SIGINT, signalHandler) == SIG_ERR) {
         perror("signal can not be registered");
         return EXIT_FAILURE;
     }
+    /// initialize the server listening socket
+    if (!initServerSocket(&address)) {
+        perror("Failed to init server socket.");
+        return EXIT_FAILURE;
+    }
+
+    /// listen for connections
+    if (listen(create_socket, 5) == -1) {
+        perror("listen error");
+        return EXIT_FAILURE;
+    }
+
+    /// accept connections todo: forking
+    while (!abortRequested) {
+        printf("Waiting for connections...\n");
+
+        addrLen = sizeof(struct sockaddr_in);
+
+        ///accept connection
+        if ((new_socket = accept(create_socket, (struct sockaddr *) &cliAddress, &addrLen)) == -1) {
+            if (abortRequested) {
+                perror("accept error after aborted");
+            } else {
+                perror("accept error");
+            }
+            break;
+        }
+        /**child process handles client communication*/
+        if ((pid = fork()) == 0) {
+            printf("Client connected from %s:%d...\n", inet_ntoa(cliAddress.sin_addr), ntohs(cliAddress.sin_port));
+            clientCommunication(&new_socket); // returnValue can be ignored
+            new_socket = -1;
+        }
+    }
+
+    /// frees the descriptor
+    if (create_socket != -1) {
+        if (shutdown(create_socket, SHUT_RDWR) == -1) {
+            perror("shutdown create_socket");
+        }
+        if (close(create_socket) == -1) {
+            perror("close create_socket");
+        }
+        create_socket = -1;
+    }
+    return EXIT_SUCCESS;
+}
+
+
+int initServerSocket(struct sockaddr_in *address) {
+    int reuseValue = 1;
 
     /// Create socket
     if ((create_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -73,54 +136,16 @@ int main(int argc, char **argv) {
     }
 
     /// Init Address
-    memset(&address, 0, sizeof(address));
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(PORT);  /// notwork byte order => big endian
+    memset(address, 0, sizeof(struct sockaddr_in));
+    address->sin_family = AF_INET;
+    address->sin_addr.s_addr = INADDR_ANY;
+    address->sin_port = htons(PORT);  /// notwork byte order => big endian
 
     /// Assign Address and Port
     if (bind(create_socket, (struct sockaddr *) &address, sizeof(address)) == -1) {
         perror("bind error");
         return EXIT_FAILURE;
     }
-
-    /// listen for connections
-    if (listen(create_socket, 5) == -1) {
-        perror("listen error");
-        return EXIT_FAILURE;
-    }
-
-    while (!abortRequested) {
-        printf("Waiting for connections...\n");
-
-        addrlen = sizeof(struct sockaddr_in);
-
-        ///accept connection
-        if ((new_socket = accept(create_socket, (struct sockaddr *) &cliaddress, &addrlen)) == -1) {
-            if (abortRequested) {
-                perror("accept error after aborted");
-            } else {
-                perror("accept error");
-            }
-            break;
-        }
-
-        printf("Client connected from %s:%d...\n", inet_ntoa(cliaddress.sin_addr), ntohs(cliaddress.sin_port));
-        clientCommunication(&new_socket); // returnValue can be ignored
-        new_socket = -1;
-    }
-
-    // frees the descriptor
-    if (create_socket != -1) {
-        if (shutdown(create_socket, SHUT_RDWR) == -1) {
-            perror("shutdown create_socket");
-        }
-        if (close(create_socket) == -1) {
-            perror("close create_socket");
-        }
-        create_socket = -1;
-    }
-
     return EXIT_SUCCESS;
 }
 
@@ -131,7 +156,6 @@ void clientCommunication(void *data) {
     char listBuffer[BUF];
     char message[BUF];
     char filename[256];
-    int number = -1;
 
     strcpy(buffer, "Welcome to myserver!\r\nPlease enter your commands...\r\n");
     if (send(*current_socket, buffer, strlen(buffer), 0) == -1) {
@@ -158,7 +182,6 @@ void clientCommunication(void *data) {
 
             case Send:
                 sendMail(current_socket, buffer); //return abfragen
-
                 break;
 
             case Read:
@@ -175,22 +198,16 @@ void clientCommunication(void *data) {
             case Del:
                 respondToClient(current_socket, "Enter username");
                 strcpy(username, receiveClientCommand(current_socket, buffer));
-
                 respondToClient(current_socket, "Enter message no.");
-                deleteMail(username, )
+                deleteMail(username, filename);
                 break;
-
-            case Quit:
-
-                break;
-
-
             case Unknown:
                 respondToClient(current_socket, "Unknown command\n");
                 break;
-
+            case Quit:
+            default:
+                break;
         }
-
     } while (strcmp(buffer, "quit") != 0 && !abortRequested);
 
     // closes/frees the descriptor if not already
@@ -266,7 +283,7 @@ int sendMail(int *current_socket, char *buffer) {
     char subject[256];
     char message[256];
 
-//get input from client for Message
+    /** get input from client for Message */
     respondToClient(current_socket, "Enter your username");          //SENDER 
     strcpy(sender, receiveClientCommand(current_socket, buffer));
   
@@ -299,7 +316,7 @@ int sendMail(int *current_socket, char *buffer) {
             
         }
     } else {
-        respondToClient(current_socket, "Your mail was not send");
+        respondToClient(current_socket, "Your mail was not sent");
         return 0;
         
     }
@@ -308,12 +325,11 @@ int sendMail(int *current_socket, char *buffer) {
     return 1;
 }
 
-
-int writeToInAndOutBox(char *receiver, char *completeMessage, char*subject, char* inOrOut){
+int writeToInAndOutBox(char *username, char *completeMessage, char*subject, char* inOrOut){
     fflush(stdout);
     //making path to inbox of receiver
     char path[256] = "/var/mail/";
-    strcat(path, receiver);
+    strcat(path, username);
     strcat(path, inOrOut);
 
    //check if directory(=mailbox) exists
@@ -330,7 +346,7 @@ int writeToInAndOutBox(char *receiver, char *completeMessage, char*subject, char
     //write to directory
     FILE* mail;
     mail = fopen(path, "w+");
-    fprintf(mail, completeMessage);
+    fprintf(mail,"%s",completeMessage);
     fclose(mail);
     return 1;
 }
@@ -351,7 +367,6 @@ char *readMail(char *username, char *filename, char *buffer) {
     return buffer;
 }
 
-
 int deleteMail(char *username, char *filename) {
     char filepath[256];
     sprintf(filepath, "/var/mail/%s/in/%s", username, filename);
@@ -360,10 +375,9 @@ int deleteMail(char *username, char *filename) {
     return 0;
 }
 
-char *receiveClientCommand(int *current_socket, char *buffer) {
-
+char *receiveClientCommand(const int *current_socket, char *buffer) {
     int size;
-    size = recv(*current_socket, buffer, BUF - 1, 0);
+    size = (int)recv(*current_socket, buffer, BUF - 1, 0);
     if (size == -1) {
         if (abortRequested) {
             perror("recv error after aborted");
@@ -388,11 +402,12 @@ char *receiveClientCommand(int *current_socket, char *buffer) {
     return buffer;
 }
 
-int respondToClient(int *current_socket, char *message) {
+int respondToClient(const int *current_socket, char *message) {
     if (send(*current_socket, message, strlen(message), 0) == -1) {
         perror("send answer failed");
         return -1;
     }
+    return 0;
 }
 
 void signalHandler(int sig) {
@@ -424,24 +439,22 @@ void signalHandler(int sig) {
     }
 }
 
-char *getFileFromList(char *listBuffer, char *number, char *buffer) {
+
+/// select a file from a '\n' seperated list and trim the leading number
+void getFileFromList(const char *listBuffer, char *number, char *buffer) {
     char *lineBuffer = (char *) malloc(sizeof(char) * 256);
     size_t numLen = strlen(number);
-
-    printf("Listbuffer: %s", listBuffer);
 
     for (int i = 0, j = 0; listBuffer[i] != '\0'; i++) {
         ///read current line into lineBuffer
         lineBuffer[j++] = listBuffer[i];
         ///at newline, check if we need that line, else reset counter
         if (listBuffer[i] == '\n') {
-
             /// compare first byte of string
             if (strncmp(number, lineBuffer, numLen) == 0) {
                 lineBuffer[j-1] = '\0';
                 lineBuffer += (numLen+1);
                 strcpy(buffer, lineBuffer);
-                printf("filenamebuffer%s\n", buffer);
                 fflush(stdout);
             }
             j = 0;
