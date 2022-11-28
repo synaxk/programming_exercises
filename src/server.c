@@ -8,6 +8,7 @@
 #include <string.h>
 #include <signal.h>
 #include <dirent.h>
+#include <ldap.h>
 
 #define BUF 1024
 #define PORT 6543
@@ -17,7 +18,7 @@ int create_socket = -1;
 int new_socket = -1;
 
 enum mailCommand {
-    Quit = 0, Send = 1, List = 2, Read = 3, Del = 4, Unknown = 5
+    Quit = 0, Send = 1, List = 2, Read = 3, Del = 4, Unknown = 5, Login = 6
 };
 
 /**Functions*/
@@ -29,7 +30,7 @@ int initServerSocket(struct sockaddr_in *address);
 
 
 /**get user credentials and send auth request*/
-int login();
+int getCredLogin();
 
 /**send authentication request to ldap server*/
 int authRequest(char *username, char*password);
@@ -156,6 +157,7 @@ void clientCommunication(void *data) {
     char listBuffer[BUF];
     char message[BUF];
     char filename[256];
+    int login = -1;
 
     strcpy(buffer, "Welcome to myserver!\r\nPlease enter your commands...\r\n");
     if (send(*current_socket, buffer, strlen(buffer), 0) == -1) {
@@ -167,47 +169,62 @@ void clientCommunication(void *data) {
         receiveClientCommand(current_socket, buffer);
         ///compare command strings
         enum mailCommand cmd = getMailCommand(buffer);
+        if (login) {
+            login = getCredLogin();
+            switch (login) {
+                case 0:
+                case 1:
+                case 2:
+                    continue; /// einfach weiter machen, falls nicht eingeloggt wird nochmal versucht
+                case 3:
+                default:
+                    ///blacklist client ip
+                    break;
+            }
 
-        switch (cmd) {
-            case List:
-                respondToClient(current_socket, "Enter username");
-                strcpy(username, receiveClientCommand(current_socket, buffer));
-                if (listMails(username, buffer)) {
-                    strcpy(listBuffer, buffer);
-                    respondToClient(current_socket, buffer);
-                } else {
-                    respondToClient(current_socket, "Unknown Username");
-                }
-                break;
-
-            case Send:
-                sendMail(current_socket, buffer); //return abfragen
-                break;
-
-            case Read:
-                respondToClient(current_socket, "Enter username");
-                strcpy(username, receiveClientCommand(current_socket, buffer));
-                respondToClient(current_socket, "Enter message no.");
-                getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), filename);
-
-                printf("Current Buffer: %s\n", filename );
-                strcpy(message, readMail(username, filename, buffer));
-
-                respondToClient(current_socket, message);
-                break;
-            case Del:
-                respondToClient(current_socket, "Enter username");
-                strcpy(username, receiveClientCommand(current_socket, buffer));
-                respondToClient(current_socket, "Enter message no.");
-                deleteMail(username, filename);
-                break;
-            case Unknown:
-                respondToClient(current_socket, "Unknown command\n");
-                break;
-            case Quit:
-            default:
-                break;
         }
+            switch (cmd) {
+                case List:
+                    respondToClient(current_socket, "Enter username");
+                    strcpy(username, receiveClientCommand(current_socket, buffer));
+                    if (listMails(username, buffer)) {
+                        strcpy(listBuffer, buffer);
+                        respondToClient(current_socket, buffer);
+                    } else {
+                        respondToClient(current_socket, "Unknown Username");
+                    }
+                    break;
+
+                case Send:
+                    sendMail(current_socket, buffer); //return abfragen
+                    break;
+
+                case Read:
+                    respondToClient(current_socket, "Enter username");
+                    strcpy(username, receiveClientCommand(current_socket, buffer));
+                    respondToClient(current_socket, "Enter message no.");
+                    getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), filename);
+
+                    printf("Current Buffer: %s\n", filename );
+                    strcpy(message, readMail(username, filename, buffer));
+
+                    respondToClient(current_socket, message);
+                    break;
+                case Del:
+                    respondToClient(current_socket, "Enter username");
+                    strcpy(username, receiveClientCommand(current_socket, buffer));
+                    respondToClient(current_socket, "Enter message no.");
+                    deleteMail(username, filename);
+                    break;
+                case Unknown:
+                    respondToClient(current_socket, "Unknown command\n");
+                    break;
+                case Quit:
+                default:
+                    break;
+            }
+
+
     } while (strcmp(buffer, "quit") != 0 && !abortRequested);
 
     // closes/frees the descriptor if not already
@@ -233,6 +250,8 @@ enum mailCommand getMailCommand(char *buffer) {
         return Del;
     } else if (strcmp(buffer, "QUIT") == 0) {
         return Quit;
+    } else if (strcmp(buffer, "LOGIN") == 0) {
+        return Login;
     } else {
         return Unknown;
     }
@@ -460,4 +479,63 @@ void getFileFromList(const char *listBuffer, char *number, char *buffer) {
             j = 0;
         }
     }
+
+}
+
+int authRequest(char *username, char *password) {
+    ///setup ldap connection
+    const int ldapVersion = LDAP_VERSION3;
+    const char *ldapUri = "ldap://ldap.technikum-wien.at";
+    char userDN[256];
+    LDAP *ldapHandle;
+
+    sprintf(userDN, "uid=%s,ou=people,dc=technikum-wien,dc=at", username);
+
+    if (ldap_initialize(&ldapHandle, ldapUri) != LDAP_SUCCESS) {
+        perror("ldap init failed\n");
+        return 0;
+    }
+
+    if (ldap_set_option(ldapHandle,LDAP_OPT_PROTOCOL_VERSION,&ldapVersion) != LDAP_OPT_SUCCESS){
+        perror("ldap opt failed\n");
+        ldap_unbind_ext_s(ldapHandle, NULL, NULL);
+        return 0;
+    }
+
+    if (ldap_start_tls_s(ldapHandle,NULL,NULL) != LDAP_SUCCESS) {
+        perror("ldap start tls failed");
+        ldap_unbind_ext_s(ldapHandle, NULL, NULL);
+        return 0;
+    }
+
+    BerValue bindCredentials;
+    bindCredentials.bv_val = (char *)password;
+    bindCredentials.bv_len = strlen(password);
+    BerValue *serverCredp; // server's credentials
+
+    if (ldap_sasl_bind_s(ldapHandle,
+                     userDN,
+                     LDAP_SASL_SIMPLE,
+                     &bindCredentials,
+                     NULL,
+                     NULL,
+                     &serverCredp) != LDAP_SUCCESS) {
+        perror("ldap bind error\n");
+        ldap_unbind_ext_s(ldapHandle, NULL, NULL);
+        return 0;
+    }
+
+    return 1;
+}
+
+int getCredLogin () {
+    static int attempt = 0;
+    char username[20];
+    char password[20];
+    ///get username
+    ///get password
+    if (authRequest(username, password)) {
+        return 0;
+    }
+    return ++attempt;
 }
