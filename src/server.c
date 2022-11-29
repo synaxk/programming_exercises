@@ -63,11 +63,11 @@ void getFileFromList(const char *listBuffer, char *number, char *buffer);
 /**Construct message and write file (name = subject) to /var/mail/USERNAME/*/
 int writeToInAndOutBox(char *username, char *completeMessage, char *subject, char *inOrOut);
 
+/**check for client IP in blacklist and calc timediff*/
 int checkBlacklist(struct in_addr clientIP);
 
+/**add ip to blacklist*/
 int addToBlackList(struct in_addr clientIP);
-
-/// 127.0.0.1
 
 int main(int argc, char **argv) {
     socklen_t addrLen;
