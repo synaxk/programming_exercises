@@ -127,11 +127,11 @@ int main(int argc, char **argv) {
                 new_socket = -1;
             }
         }
-
-
-       // while(wait(NULL)); ///wait for child process
-
     }
+
+    while(wait(NULL))
+        ; ///wait for child process
+
 
     /// frees the descriptor
     if (create_socket != -1) {
@@ -190,6 +190,7 @@ void clientCommunication(void *data, struct in_addr clientIP) {
     char message[BUF];
     char filename[256];
     int login = -1;
+    int blacklisted = 0;
 
     strcpy(buffer, "Welcome to myserver!\r\nPlease enter your commands...\r\n");
     if (send(*current_socket, buffer, strlen(buffer), 0) == -1) {
@@ -219,52 +220,52 @@ void clientCommunication(void *data, struct in_addr clientIP) {
                 default:
                     respondToClient(current_socket, "You are blacklisted for 1 min...");
                     addToBlackList(clientIP);
-                    abortRequested = 1;
+                    blacklisted = 1;
                     ///blacklist client ip
                     break;
             }
+        } else {
+            switch (cmd) {
+                case List:
+                    if (listMails(username, buffer)) {
+                        strcpy(listBuffer, buffer);
+                        respondToClient(current_socket, buffer);
+                    } else {
+                        respondToClient(current_socket, "Unknown Username");
+                    }
+                    break;
+
+                case Send:
+                    sendMail(current_socket, username, buffer); //return abfragen
+                    break;
+
+                case Read:
+
+                    respondToClient(current_socket, "Enter message no.");
+                    getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), filename);
+
+                    printf("Current Buffer: %s\n", filename);
+                    strcpy(message, readMail(username, filename, buffer));
+
+                    respondToClient(current_socket, message);
+                    break;
+                case Del:
+                    respondToClient(current_socket, "Enter message no.");
+                    deleteMail(username, filename);
+                    break;
+                case Unknown:
+                    respondToClient(current_socket, "Unknown command\n");
+                    break;
+                case Login:
+                    respondToClient(current_socket, "Already logged in");
+                    break;
+                case Quit:
+                default:
+                    break;
+            }
         }
-        switch (cmd) {
-            case List:
-                if (listMails(username, buffer)) {
-                    strcpy(listBuffer, buffer);
-                    respondToClient(current_socket, buffer);
-                } else {
-                    respondToClient(current_socket, "Unknown Username");
-                }
-                break;
 
-            case Send:
-                sendMail(current_socket, username, buffer); //return abfragen
-                break;
-
-            case Read:
-
-                respondToClient(current_socket, "Enter message no.");
-                getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), filename);
-
-                printf("Current Buffer: %s\n", filename);
-                strcpy(message, readMail(username, filename, buffer));
-
-                respondToClient(current_socket, message);
-                break;
-            case Del:
-                respondToClient(current_socket, "Enter message no.");
-                deleteMail(username, filename);
-                break;
-            case Unknown:
-                respondToClient(current_socket, "Unknown command\n");
-                break;
-            case Login:
-                respondToClient(current_socket, "Already logged in");
-                break;
-            case Quit:
-            default:
-                break;
-        }
-
-
-    } while (strcmp(buffer, "QUIT") != 0 && !abortRequested);
+    } while (strcmp(buffer, "QUIT") != 0 && !abortRequested && !blacklisted);
 
     // closes/frees the descriptor if not already
     if (*current_socket != -1) {
