@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "mypw.h"
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -20,6 +22,7 @@ int main(int argc, char **argv) {
     struct sockaddr_in address;
     int size;
     int isQuit;
+    int pwMode = 0;
 
     ////////////////////////////////////////////////////////////////////////////
     if ((create_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -69,19 +72,29 @@ int main(int argc, char **argv) {
         printf("%s", buffer); // ignore error
     }
 
+
+
     do {
         printf(">> ");
-        if (fgets(buffer, BUF, stdin) != NULL) {
-            int size = strlen(buffer);
-            // remove new-line signs from string at the end
-            if (buffer[size - 2] == '\r' && buffer[size - 1] == '\n') {
-                size -= 2;
-                buffer[size] = 0;
-            } else if (buffer[size - 1] == '\n') {
-                --size;
-                buffer[size] = 0;
+        if (pwMode == 1) {
+            getPassWord(buffer);
+            pwMode = 0;
+            printf("brbr getpassword, Buffer: %s\n", buffer);
+        } else {
+            if (fgets(buffer, BUF, stdin) != NULL) {
+                int size = strlen(buffer);
+                // remove new-line signs from string at the end
+                if (buffer[size - 2] == '\r' && buffer[size - 1] == '\n') {
+                    size -= 2;
+                    buffer[size] = 0;
+                } else if (buffer[size - 1] == '\n') {
+                    --size;
+                    buffer[size] = 0;
+                }
+                isQuit = strcmp(buffer, "QUIT") == 0;
             }
-            isQuit = strcmp(buffer, "quit") == 0;
+        }
+
 
             //////////////////////////////////////////////////////////////////////
             // SEND DATA
@@ -89,7 +102,6 @@ int main(int argc, char **argv) {
             // send will fail if connection is closed, but does not set
             // the error of send, but still the count of bytes sent
             if ((send(create_socket, buffer, size, 0)) == -1) {
-
                 perror("send error");
                 break;
             }
@@ -117,6 +129,11 @@ int main(int argc, char **argv) {
                 buffer[size] = '\0';
                 printf("<< %s\n", buffer); // ignore error
 
+                if (strcmp(buffer, "Enter password") == 0) {
+                    printf("Password Mode enabled\n");
+                    pwMode = 1;
+                }
+
                 /*brauchma ws ned
                 if (strcmp("OK", buffer) != 0) {
                     fprintf(stderr, "<< Server error occured, abort\n");
@@ -124,7 +141,7 @@ int main(int argc, char **argv) {
                 }
                 */
             }
-        }
+
     } while (!isQuit);
 
     ////////////////////////////////////////////////////////////////////////////

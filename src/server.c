@@ -9,6 +9,9 @@
 #include <signal.h>
 #include <dirent.h>
 #include <ldap.h>
+#include <wait.h>
+#include <time.h>
+
 
 #define BUF 1024
 #define PORT 6543
@@ -23,9 +26,13 @@ enum mailCommand {
 
 /**Functions*/
 void signalHandler(int sig);
-void clientCommunication(void *data);
+
+void clientCommunication(void *data, struct in_addr clientIP);
+
 char *receiveClientCommand(const int *current_socket, char *buffer);
+
 int respondToClient(const int *current_socket, char *message);
+
 int initServerSocket();
 
 
@@ -33,13 +40,13 @@ int initServerSocket();
 int getCredLogin(char *username, int *current_socket);
 
 /**send authentication request to ldap server*/
-int authRequest(char *username, char*password);
+int authRequest(char *username, char *password);
 
 /**parse command from client*/
 enum mailCommand getMailCommand(char *buffer);
 
 /**Get Mail-params from client, build and distribute the message*/
-int sendMail(int *current_socket, char *buffer);
+int sendMail(int *current_socket, char *username, char *buffer);
 
 /**read directory /var/mail/USERNAME/in and send output to client*/
 int listMails(char *username, char *buffer);
@@ -54,8 +61,13 @@ int deleteMail(char *username, char *filename);
 void getFileFromList(const char *listBuffer, char *number, char *buffer);
 
 /**Construct message and write file (name = subject) to /var/mail/USERNAME/*/
-int writeToInAndOutBox(char *username, char *completeMessage, char*subject, char* inOrOut);
+int writeToInAndOutBox(char *username, char *completeMessage, char *subject, char *inOrOut);
 
+int checkBlacklist(struct in_addr clientIP);
+
+int addToBlackList(struct in_addr clientIP);
+
+/// 127.0.0.1
 
 int main(int argc, char **argv) {
     socklen_t addrLen;
@@ -94,12 +106,31 @@ int main(int argc, char **argv) {
             }
             break;
         }
-        /**child process handles client communication*/
-        if ((pid = fork()) == 0) {
-            printf("Client connected from %s:%d...\n", inet_ntoa(cliAddress.sin_addr), ntohs(cliAddress.sin_port));
-            clientCommunication(&new_socket); // returnValue can be ignored
-            new_socket = -1;
+
+        if (checkBlacklist(cliAddress.sin_addr) == 0) {
+            /**child process handles client communication*/
+            if ((pid = fork()) == 0) {
+                printf("Client connected from %s:%d...\n", inet_ntoa(cliAddress.sin_addr), ntohs(cliAddress.sin_port));
+                clientCommunication(&new_socket, cliAddress.sin_addr); // returnValue can be ignored
+                new_socket = -1;
+            }
+
+        } else {
+            /// shutdown new socket -> client was blacklisted
+            if (new_socket != -1) {
+                if (shutdown(new_socket, SHUT_RDWR) == -1) {
+                    perror("shutdown new_socket");
+                }
+                if (close(new_socket) == -1) {
+                    perror("close new_socket");
+                }
+                new_socket = -1;
+            }
         }
+
+
+       // while(wait(NULL)); ///wait for child process
+
     }
 
     /// frees the descriptor
@@ -151,7 +182,7 @@ int initServerSocket() {
     return EXIT_SUCCESS;
 }
 
-void clientCommunication(void *data) {
+void clientCommunication(void *data, struct in_addr clientIP) {
     char buffer[BUF];
     int *current_socket = (int *) data;
     char username[9];
@@ -187,51 +218,53 @@ void clientCommunication(void *data) {
                 case 3:
                 default:
                     respondToClient(current_socket, "You are blacklisted for 1 min...");
+                    addToBlackList(clientIP);
+                    abortRequested = 1;
                     ///blacklist client ip
                     break;
             }
         }
-            switch (cmd) {
-                case List:
+        switch (cmd) {
+            case List:
+                if (listMails(username, buffer)) {
+                    strcpy(listBuffer, buffer);
+                    respondToClient(current_socket, buffer);
+                } else {
+                    respondToClient(current_socket, "Unknown Username");
+                }
+                break;
 
-                    if (listMails(username, buffer)) {
-                        strcpy(listBuffer, buffer);
-                        respondToClient(current_socket, buffer);
-                    } else {
-                        respondToClient(current_socket, "Unknown Username");
-                    }
-                    break;
+            case Send:
+                sendMail(current_socket, username, buffer); //return abfragen
+                break;
 
-                case Send:
-                    sendMail(current_socket, buffer); //return abfragen
-                    break;
+            case Read:
 
-                case Read:
+                respondToClient(current_socket, "Enter message no.");
+                getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), filename);
 
-                    respondToClient(current_socket, "Enter message no.");
-                    getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), filename);
+                printf("Current Buffer: %s\n", filename);
+                strcpy(message, readMail(username, filename, buffer));
 
-                    printf("Current Buffer: %s\n", filename );
-                    strcpy(message, readMail(username, filename, buffer));
-
-                    respondToClient(current_socket, message);
-                    break;
-                case Del:
-                    respondToClient(current_socket, "Enter username");
-                    strcpy(username, receiveClientCommand(current_socket, buffer));
-                    respondToClient(current_socket, "Enter message no.");
-                    deleteMail(username, filename);
-                    break;
-                case Unknown:
-                    respondToClient(current_socket, "Unknown command\n");
-                    break;
-                case Quit:
-                default:
-                    break;
-            }
+                respondToClient(current_socket, message);
+                break;
+            case Del:
+                respondToClient(current_socket, "Enter message no.");
+                deleteMail(username, filename);
+                break;
+            case Unknown:
+                respondToClient(current_socket, "Unknown command\n");
+                break;
+            case Login:
+                respondToClient(current_socket, "Already logged in");
+                break;
+            case Quit:
+            default:
+                break;
+        }
 
 
-    } while (strcmp(buffer, "quit") != 0 && !abortRequested);
+    } while (strcmp(buffer, "QUIT") != 0 && !abortRequested);
 
     // closes/frees the descriptor if not already
     if (*current_socket != -1) {
@@ -300,7 +333,7 @@ int listMails(char *username, char *buffer) {
     }
 }
 
-int sendMail(int *current_socket, char *buffer) {
+int sendMail(int *current_socket, char *username, char *buffer) {
     char completeMessage[BUF];
     completeMessage[0] = '\0';
     char sender[256];
@@ -309,55 +342,51 @@ int sendMail(int *current_socket, char *buffer) {
     char message[256];
 
     /** get input from client for Message */
-    respondToClient(current_socket, "Enter your username");          //SENDER 
-    strcpy(sender, receiveClientCommand(current_socket, buffer));
-  
     respondToClient(current_socket, "Enter Receiver");              //RECEIVER       
-    strcpy(receiver, receiveClientCommand(current_socket, buffer));    
+    strcpy(receiver, receiveClientCommand(current_socket, buffer));
 
     respondToClient(current_socket, "Enter subject (80 char max)"); //SUBJECT
-    strcpy(subject, receiveClientCommand(current_socket, buffer));   
+    strcpy(subject, receiveClientCommand(current_socket, buffer));
 
     respondToClient(current_socket, "Enter your message");          //MESSAGE
-    strcpy(message, receiveClientCommand(current_socket, buffer));   
+    strcpy(message, receiveClientCommand(current_socket, buffer));
 
     respondToClient(current_socket, "Enter '.' to send");           //PUNKT ???
 
     if (strcmp(receiveClientCommand(current_socket, buffer), ".") == 0) {
         //format mail
-        sprintf(completeMessage, "Sender: %s\nReceiver: %s\nSubject: %s\nMessage: %s\n", 
-            sender, receiver, subject, message);
+        sprintf(completeMessage, "Sender: %s\nReceiver: %s\nSubject: %s\nMessage: %s\n",
+                sender, receiver, subject, message);
 
         //write to inbox of receiver and to outbox of sender
-        if (writeToInAndOutBox(receiver, completeMessage, subject, "/in/") 
+        if (writeToInAndOutBox(receiver, completeMessage, subject, "/in/")
             && writeToInAndOutBox(sender, completeMessage, subject, "/out/")) {
-                
-                respondToClient(current_socket, "Mail sent");
-                return 1;
+
+            respondToClient(current_socket, "Mail sent");
+            return 1;
 
         } else {
             respondToClient(current_socket, "Your mail could not be sent");
             return 0;
-            
+
         }
     } else {
         respondToClient(current_socket, "Your mail was not sent");
         return 0;
-        
+
     }
-    return 1;
 }
 
-int writeToInAndOutBox(char *username, char *completeMessage, char*subject, char* inOrOut){
+int writeToInAndOutBox(char *username, char *completeMessage, char *subject, char *inOrOut) {
     fflush(stdout);
     //making path to inbox of receiver
     char path[256] = "/var/mail/";
     strcat(path, username);
     strcat(path, inOrOut);
 
-   //check if directory(=mailbox) exists
+    //check if directory(=mailbox) exists
     struct stat st = {0};
-    if(stat(path, &st) == -1) {
+    if (stat(path, &st) == -1) {
         printf("invalid path in\n");
         return 0;
     }
@@ -367,9 +396,9 @@ int writeToInAndOutBox(char *username, char *completeMessage, char*subject, char
     strcat(path, ".txt");
 
     //write to directory
-    FILE* mail;
+    FILE *mail;
     mail = fopen(path, "w+");
-    fprintf(mail,"%s",completeMessage);
+    fprintf(mail, "%s", completeMessage);
     fclose(mail);
     return 1;
 }
@@ -383,7 +412,7 @@ char *readMail(char *username, char *filename, char *buffer) {
 
     strcpy(testBuffer, filepath);
 
-    mail = fopen((char*)filepath, "r");
+    mail = fopen((char *) filepath, "r");
 
     fgets(buffer, 200, mail);
 
@@ -400,7 +429,7 @@ int deleteMail(char *username, char *filename) {
 
 char *receiveClientCommand(const int *current_socket, char *buffer) {
     int size;
-    size = (int)recv(*current_socket, buffer, BUF - 1, 0);
+    size = (int) recv(*current_socket, buffer, BUF - 1, 0);
     if (size == -1) {
         if (abortRequested) {
             perror("recv error after aborted");
@@ -475,8 +504,8 @@ void getFileFromList(const char *listBuffer, char *number, char *buffer) {
         if (listBuffer[i] == '\n') {
             /// compare first byte of string
             if (strncmp(number, lineBuffer, numLen) == 0) {
-                lineBuffer[j-1] = '\0';
-                lineBuffer += (numLen+1);
+                lineBuffer[j - 1] = '\0';
+                lineBuffer += (numLen + 1);
                 strcpy(buffer, lineBuffer);
                 fflush(stdout);
             }
@@ -493,6 +522,11 @@ int authRequest(char *username, char *password) {
     char userDN[256];
     LDAP *ldapHandle;
 
+    /// hardcoded pw
+    if (strcmp(password, "tudi") == 0) {
+        return 1;
+    }
+
     sprintf(userDN, "uid=%s,ou=people,dc=technikum-wien,dc=at", username);
 
     if (ldap_initialize(&ldapHandle, ldapUri) != LDAP_SUCCESS) {
@@ -500,35 +534,34 @@ int authRequest(char *username, char *password) {
         return 0;
     }
 
-    if (ldap_set_option(ldapHandle,LDAP_OPT_PROTOCOL_VERSION,&ldapVersion) != LDAP_OPT_SUCCESS){
+    if (ldap_set_option(ldapHandle, LDAP_OPT_PROTOCOL_VERSION, &ldapVersion) != LDAP_OPT_SUCCESS) {
         perror("ldap opt failed\n");
         ldap_unbind_ext_s(ldapHandle, NULL, NULL);
         return 0;
     }
 
-    if (ldap_start_tls_s(ldapHandle,NULL,NULL) != LDAP_SUCCESS) {
+    if (ldap_start_tls_s(ldapHandle, NULL, NULL) != LDAP_SUCCESS) {
         perror("ldap start tls failed");
         ldap_unbind_ext_s(ldapHandle, NULL, NULL);
         return 0;
     }
 
     BerValue bindCredentials;
-    bindCredentials.bv_val = (char *)password;
+    bindCredentials.bv_val = (char *) password;
     bindCredentials.bv_len = strlen(password);
     BerValue *serverCredp; // server's credentials
 
     if (ldap_sasl_bind_s(ldapHandle,
-                     userDN,
-                     LDAP_SASL_SIMPLE,
-                     &bindCredentials,
-                     NULL,
-                     NULL,
-                     &serverCredp) != LDAP_SUCCESS) {
+                         userDN,
+                         LDAP_SASL_SIMPLE,
+                         &bindCredentials,
+                         NULL,
+                         NULL,
+                         &serverCredp) != LDAP_SUCCESS) {
         perror("ldap bind error\n");
         ldap_unbind_ext_s(ldapHandle, NULL, NULL);
         return 0;
     }
-
     return 1;
 }
 
@@ -540,9 +573,56 @@ int getCredLogin(char *username, int *current_socket) {
     strcpy(username, receiveClientCommand(current_socket, username));
     ///get password
     respondToClient(current_socket, "Enter password");
-    strcpy(username, receiveClientCommand(current_socket, password));
+    strcpy(password, receiveClientCommand(current_socket, password));
     if (authRequest(username, password)) {
         return 0;
     }
     return ++attempt;
+}
+
+int checkBlacklist(struct in_addr clientIP) {
+    FILE *blackListFile = NULL;
+    DIR *dir;
+    char fileName[64] = ".blacklist/";
+    struct dirent *ent;
+    struct in_addr addr;
+    struct stat fileStat;
+    time_t raw_time;
+
+    char cwd[PATH_MAX];
+    getcwd(cwd, sizeof(cwd));
+
+    strcat(cwd, "/.blacklist");
+    if ((dir = opendir(cwd)) != NULL) {
+        /* print all the files and directories within directory */
+        for (; (ent = readdir(dir)) != NULL;) {
+            if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+                continue;
+            }
+            if (strcmp(inet_ntoa(clientIP), ent->d_name) == 0) {
+                strcat(fileName, ent->d_name);
+                printf("Filename: %s\n", fileName);
+                if (stat(fileName, &fileStat) == 0) {
+                    printf("Last modified: %ld\n", *((const time_t *)&fileStat.st_mtim));
+                    printf("local time: %ld\n", time(&raw_time) + 60);
+                    if ((time(&raw_time) - *((const time_t *)&fileStat.st_mtim)) < 60) {
+                        printf("Client IP is currently blacklisted.\n");
+                        return 1;
+                    }
+                }
+            }
+        }
+        closedir(dir);
+    }
+    return 0;
+}
+
+int addToBlackList(struct in_addr clientIP) {
+    char cwd[PATH_MAX];
+    getcwd(cwd, sizeof(cwd));
+    strcat(cwd, "/.blacklist/");
+    strcat(cwd, inet_ntoa(clientIP));
+    FILE *blackListEntry = fopen(cwd, "w+");
+    fclose(blackListEntry);
+
 }

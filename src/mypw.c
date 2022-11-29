@@ -1,8 +1,8 @@
 #include <termios.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <iostream>
-#include <string>
+#include <string.h>
+#include "mypw.h"
 
 int getch()
 {
@@ -40,40 +40,35 @@ int getch()
     return ch;
 }
 
-const char *getpass()
-{
-    int show_asterisk = 0;
+void getPassWord(char *password) {
+    int show_asterisk = 1;
 
     const char BACKSPACE = 127;
     const char RETURN = 10;
 
     unsigned char ch = 0;
-    std::string password;
+
+    memset(password, '\0', 20);
 
     printf("Password: ");
-
-    while ((ch = getch()) != RETURN)
-    {
-        if (ch == BACKSPACE)
-        {
-            if (password.length() != 0)
-            {
-                if (show_asterisk)
-                {
+    int i = 0;
+    for (; (ch = getch()) != RETURN; i++) {
+        if (ch == BACKSPACE) {
+            if (strlen(password) != 0) {
+                if (show_asterisk) {
                     printf("\b \b"); // backslash: \b
                 }
-                password.resize(password.length() - 1);
             }
         }
         else
         {
-            password += ch;
+            password[i] = ch;
             if (show_asterisk)
             {
                 printf("*");
             }
         }
     }
-    printf("\n");
-    return password.c_str();
+    password[++i] = '\0';
+    printf("Password in getPassword: %s\n", password);
 }
