@@ -26,11 +26,11 @@ void signalHandler(int sig);
 void clientCommunication(void *data);
 char *receiveClientCommand(const int *current_socket, char *buffer);
 int respondToClient(const int *current_socket, char *message);
-int initServerSocket(struct sockaddr_in *address);
+int initServerSocket();
 
 
 /**get user credentials and send auth request*/
-int getCredLogin();
+int getCredLogin(char *username, int *current_socket);
 
 /**send authentication request to ldap server*/
 int authRequest(char *username, char*password);
@@ -59,7 +59,7 @@ int writeToInAndOutBox(char *username, char *completeMessage, char*subject, char
 
 int main(int argc, char **argv) {
     socklen_t addrLen;
-    struct sockaddr_in address, cliAddress;
+    struct sockaddr_in cliAddress;
     int pid = 1;
 
     ///signal listener
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
     /// initialize the server listening socket
-    if (!initServerSocket(&address)) {
+    if (initServerSocket()) {
         perror("Failed to init server socket.");
         return EXIT_FAILURE;
     }
@@ -116,7 +116,8 @@ int main(int argc, char **argv) {
 }
 
 
-int initServerSocket(struct sockaddr_in *address) {
+int initServerSocket() {
+    struct sockaddr_in address;
     int reuseValue = 1;
 
     /// Create socket
@@ -137,10 +138,10 @@ int initServerSocket(struct sockaddr_in *address) {
     }
 
     /// Init Address
-    memset(address, 0, sizeof(struct sockaddr_in));
-    address->sin_family = AF_INET;
-    address->sin_addr.s_addr = INADDR_ANY;
-    address->sin_port = htons(PORT);  /// notwork byte order => big endian
+    memset(&address, 0, sizeof(address));
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(PORT);  /// notwork byte order => big endian
 
     /// Assign Address and Port
     if (bind(create_socket, (struct sockaddr *) &address, sizeof(address)) == -1) {
@@ -169,24 +170,30 @@ void clientCommunication(void *data) {
         receiveClientCommand(current_socket, buffer);
         ///compare command strings
         enum mailCommand cmd = getMailCommand(buffer);
-        if (login) {
-            login = getCredLogin();
+        if (login != 0) {
+            if (cmd != Login) {
+                respondToClient(current_socket, "You need to login first\n");
+                continue;
+            }
+            login = getCredLogin(username, current_socket);
             switch (login) {
                 case 0:
+                    respondToClient(current_socket, "Login success");
+                    continue;
                 case 1:
                 case 2:
+                    respondToClient(current_socket, "Try again...");
                     continue; /// einfach weiter machen, falls nicht eingeloggt wird nochmal versucht
                 case 3:
                 default:
+                    respondToClient(current_socket, "You are blacklisted for 1 min...");
                     ///blacklist client ip
                     break;
             }
-
         }
             switch (cmd) {
                 case List:
-                    respondToClient(current_socket, "Enter username");
-                    strcpy(username, receiveClientCommand(current_socket, buffer));
+
                     if (listMails(username, buffer)) {
                         strcpy(listBuffer, buffer);
                         respondToClient(current_socket, buffer);
@@ -200,8 +207,7 @@ void clientCommunication(void *data) {
                     break;
 
                 case Read:
-                    respondToClient(current_socket, "Enter username");
-                    strcpy(username, receiveClientCommand(current_socket, buffer));
+
                     respondToClient(current_socket, "Enter message no.");
                     getFileFromList(listBuffer, receiveClientCommand(current_socket, buffer), filename);
 
@@ -339,8 +345,6 @@ int sendMail(int *current_socket, char *buffer) {
         return 0;
         
     }
-
-
     return 1;
 }
 
@@ -528,12 +532,15 @@ int authRequest(char *username, char *password) {
     return 1;
 }
 
-int getCredLogin () {
+int getCredLogin(char *username, int *current_socket) {
     static int attempt = 0;
-    char username[20];
     char password[20];
     ///get username
+    respondToClient(current_socket, "Enter username");
+    strcpy(username, receiveClientCommand(current_socket, username));
     ///get password
+    respondToClient(current_socket, "Enter password");
+    strcpy(username, receiveClientCommand(current_socket, password));
     if (authRequest(username, password)) {
         return 0;
     }
