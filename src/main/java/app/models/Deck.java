@@ -1,35 +1,32 @@
-package app.model;
+package app.models;
 
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Random;
 
-public class Deck extends CardCollection {
+public class Deck {
     @Setter
     @Getter
     private int deck_id;
     private String name;
+    private ArrayList<Card> cards;
 
     public Deck() {
-        super(4);
     }
 
     public void removeCard(Card card) {
         this.cards.remove(card);
     }
 
-    public boolean addCard(Card newCard) {
-        if (cards.size() <= limit) {
-            this.cards.add(newCard);
-            return true;
-        }
-        return false;
+    public void addCard(Card newCard) {
+        this.cards.add(newCard);
     }
 
     public Card getRandomCard() {
         Random rnd = new Random();
-        return this.cards.get(rnd.nextInt(0,limit));
+        return this.cards.get(rnd.nextInt(0));
     }
 
 }

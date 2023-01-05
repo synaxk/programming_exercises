@@ -1,8 +1,7 @@
-package http;
+package server;
 
 import http.ContentType;
 import http.HttpStatus;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;

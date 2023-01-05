@@ -1,17 +1,18 @@
-package app.model;
+package app.models;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
-public class Stack extends CardCollection {
-    @Getter
-    @Setter
-    private int stack_id;
-
-    public Stack() {
-        this.cards = new ArrayList<>();
-    }
+@Getter
+@Setter
+@AllArgsConstructor
+public class Stack {
+    private UUID stack_id;
+    private UUID card_id;
+    public Stack() {}
 
 }

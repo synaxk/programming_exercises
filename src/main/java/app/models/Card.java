@@ -1,14 +1,24 @@
-package app.model;
+package app.models;
 
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.UUID;
+
 @Getter
 @Setter
-public abstract class Card {
-
-    private int card_id;
+@AllArgsConstructor
+public class Card {
+    @JsonAlias({"Card_id"})
+    private UUID card_id;
+    @JsonAlias({"Name"})
     private String name;
+    @JsonAlias({"Damage"})
     int damage;
+
+    public Card() {}
 
 }

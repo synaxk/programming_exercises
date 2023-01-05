@@ -1,39 +1,40 @@
-package app.model;
+package app.models;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
+@Getter
+@Setter
+@AllArgsConstructor
 public class User {
-    @Getter
-    @Setter
-    private int user_id;
-    private String name;
-    private String email;
+    @JsonAlias({"User_id"})
+    private UUID user_id;
+    @JsonAlias({"Username"})
+    private String username;
+    @JsonAlias({"Password"})
     private String password;
+    @JsonAlias({"Score"})
+    private int score;
+    @JsonAlias({"Coins"})
     private int coins;
-    private Card currentCard;
-    private Deck deck;
-    private Stack stack;
+    @JsonAlias({"Bio"})
+    private String bio;
+    @JsonAlias({"Image"})
+    private String image;
 
-    public User(String name, String email) {
-
-    }
-
-    public Card getCurrentCard() {
-        return this.currentCard;
-    }
-
-    public Card selectCard(){
-        return this.currentCard = this.deck.getRandomCard();
-    }
-
-    public void removeCard() {
-        this.deck.removeCard(this.currentCard);
-        this.stack.removeCard(this.currentCard);
-    }
-
-    public void addCard(Card card) {
-        this.stack.addCard(card);
+    @JsonCreator
+    public User(@JsonProperty("Username") String name, @JsonProperty("Password") String password) {
+        this.username = name;
+        this.password = password;
+        this.coins = 20; // check default
+        this.score = 100;
     }
 
 }
+
