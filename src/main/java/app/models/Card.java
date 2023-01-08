@@ -18,7 +18,8 @@ public class Card {
     private String name;
     @JsonAlias({"Damage"})
     int damage;
-
+    @JsonAlias({"CardType"})
+    CardType cardType;
     public Card() {}
 
 }

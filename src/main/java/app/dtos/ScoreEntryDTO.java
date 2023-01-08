@@ -18,6 +18,10 @@ public class ScoreEntryDTO {
     private String username;
     @JsonAlias({"Score"})
     private int score;
+    @JsonAlias({"Wins"})
+    private int wins;
+    @JsonAlias({"Losses"})
+    private int losses;
 
     public ScoreEntryDTO() {}
 }

@@ -35,14 +35,14 @@ public class PackController extends Controller {
             return new Response(
                     HttpStatus.OK,
                     ContentType.JSON,
-                    "{ \"data\": \"Success\", \"error\": null }"
+                    "{ \"data\": \"Package and cards successfully created.\", \"error\": null }"
             );
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return new Response(
                     HttpStatus.BAD_REQUEST,
                     ContentType.JSON,
-                    "{ \"error\": \"User already exists.\", \"data\": null }"
+                    "{ \"error\": \"At least one card in the packages already exists.\", \"data\": null }"
             );
         }
     }
@@ -59,19 +59,19 @@ public class PackController extends Controller {
                 return new Response(
                         HttpStatus.FORBIDDEN,
                         ContentType.JSON,
-                        "{\"data\":\"Success\",\"error\":\"null\"}"
+                        "{\"data\":\"A package has been successfully bought.\",\"error\":\"null\"}"
                 );
             }
             return new Response(
                     HttpStatus.BAD_REQUEST,
                     ContentType.JSON,
-                    "{ \"error\": \"No packages left.\", \"data\": null }"
+                    "{ \"error\": \"No card package available for buying.\", \"data\": null }"
             );
         } else {
             return new Response(
                     HttpStatus.BAD_REQUEST,
                     ContentType.JSON,
-                    "{ \"error\": \"Not enough money.\", \"data\": null }"
+                    "{ \"error\": \"Not enough money for buying a card package.\", \"data\": null }"
             );
         }
     }

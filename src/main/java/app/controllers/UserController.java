@@ -13,6 +13,7 @@ import server.Response;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 
+import java.lang.reflect.Type;
 import java.util.*;
 
 public class UserController extends Controller {
@@ -38,6 +39,7 @@ public class UserController extends Controller {
                 "{ \"data\": " + userJSON + ", \"error\": null }");
     }
 
+
     public Response createUser(String body) {
         User user = null;
         try {
@@ -46,14 +48,14 @@ public class UserController extends Controller {
             return new Response(
                     HttpStatus.OK,
                     ContentType.JSON,
-                    "{ \"data\": \"Success\", \"error\": null }"
+                    "{ \"data\": \"User successfully created.\", \"error\": null }"
             );
         } catch (RuntimeException e) {
             e.printStackTrace();
             return new Response(
                     HttpStatus.BAD_REQUEST,
                     ContentType.JSON,
-                    "{ \"error\": \"User already exists.\", \"data\": null }"
+                    "{ \"error\": \"User with same username already registered.\", \"data\": null }"
             );
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -77,7 +79,8 @@ public class UserController extends Controller {
                 for (Map.Entry<String, String> ent : req_props.entrySet()) {
                     // prohibit change of id, name, score and coins
                     if (ent.getKey().equals("user_id") || ent.getKey().equals("username")
-                            || ent.getKey().equals("score") || ent.getKey().equals("coins")) {
+                            || ent.getKey().equals("score") || ent.getKey().equals("coins")
+                            || ent.getKey().equals("wins") || ent.getKey().equals("losses")) {
                         props.remove(ent.getKey());
                         continue;
                     }
@@ -94,7 +97,7 @@ public class UserController extends Controller {
                         continue;
                     }
                     if (!ent.getValue().equals(props.get(ent.getKey()))) {
-                        props.replace(ent.getKey(), ent.getValue());
+                        props.replace(ent.getKey(), String.valueOf(ent.getValue()));
                     } else {
                         props.remove(ent.getKey());
                     }
@@ -124,7 +127,15 @@ public class UserController extends Controller {
 
     public Response getScoreBoard() throws JsonProcessingException {
         ArrayList<ScoreEntryDTO> scores = getUserRepository().readScores();
+        scores.sort((o1, o2) -> Integer.compare(o2.getScore(), o1.getScore()));
         String scoreJson = getObjectMapper().writeValueAsString(scores);
+        return new Response(HttpStatus.OK, ContentType.JSON,
+                "{ \"data\": " + scoreJson + ", \"error\": null }");
+    }
+
+    public Response getScore(String token) throws JsonProcessingException {
+        ScoreEntryDTO score = getUserRepository().readScore(token);
+        String scoreJson = getObjectMapper().writeValueAsString(score);
         return new Response(HttpStatus.OK, ContentType.JSON,
                 "{ \"data\": " + scoreJson + ", \"error\": null }");
     }

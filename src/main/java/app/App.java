@@ -1,13 +1,13 @@
 package app;
 
 import app.controllers.*;
-import app.daos.BattleDao;
 import app.daos.CardDao;
 import app.daos.PackDao;
+import app.daos.TradingDao;
 import app.daos.UserDao;
-import app.repositories.BattleRepository;
 import app.repositories.CardRepository;
 import app.repositories.PackRepository;
+import app.repositories.TradingRepository;
 import app.repositories.UserRepository;
 import app.services.DatabaseService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -32,6 +32,7 @@ public class App implements ServerApp {
     private PackController packController;
     private CardController cardController;
     private BattleController battleController;
+    private TradingController tradingController;
     private Connection connection;
 
 
@@ -44,14 +45,18 @@ public class App implements ServerApp {
         UserDao userDao = new UserDao(connection);
         PackDao packDao = new PackDao(connection);
         CardDao cardDao = new CardDao(connection);
-        BattleDao battleDao = new BattleDao(connection);
+        TradingDao tradingDao = new TradingDao(connection);
 
 
         setUserController(new UserController(new UserRepository(userDao)));
         setSessionController(new SessionController(new UserRepository(userDao)));
-        setPackController(new PackController(new PackRepository(packDao, cardDao), new UserRepository(userDao)));
+        setPackController(new PackController(new PackRepository(packDao, cardDao),
+                                                new UserRepository(userDao)));
         setCardController(new CardController(new CardRepository(cardDao, userDao)));
-        setBattleController(new BattleController(new BattleRepository(battleDao, userDao, cardDao)));
+        setBattleController(new BattleController(new UserRepository(userDao, cardDao),
+                                                new CardRepository(cardDao, userDao)));
+
+        setTradingController(new TradingController(new TradingRepository(tradingDao, userDao, cardDao)));
     }
 
     //routes
@@ -70,7 +75,7 @@ public class App implements ServerApp {
     // tradings/TRADEID || DELETE || POST
 
 
-    public Response handleRequest(Request request) throws JsonProcessingException {
+    public synchronized Response handleRequest(Request request) throws JsonProcessingException {
 
         // only allow login and registration for requests without token
         if (request.getAuthToken().isEmpty()) {
@@ -103,9 +108,13 @@ public class App implements ServerApp {
                         } else if (Pattern.matches("/cards", request.getPathname())) {
                             return getCardController().getStack(request.getAuthToken());
                         } else if (Pattern.matches("/decks", request.getPathname())) {
-                            return getCardController().getDeck(request.getAuthToken());
+                            return getCardController().getDeck(request.getAuthToken(), request.getParams());
                         } else if (Pattern.matches("/scores",request.getPathname())) {
                             return getUserController().getScoreBoard();
+                        } else if (Pattern.matches("/stats", request.getPathname())) {
+                            return getUserController().getScore(request.getAuthToken());
+                        } else if (Pattern.matches("/tradings", request.getPathname())) {
+                            return getTradingController().getTradingDeals();
                         }
                         break;
                     case PUT:
@@ -113,6 +122,8 @@ public class App implements ServerApp {
                             if (getSessionController().authorize(request.getAuthToken(), request.getPathVar())) {
                                 return getUserController().updateUser(request.getPathVar(), request.getBody());
                             }
+                            return new Response(HttpStatus.FORBIDDEN, ContentType.JSON,
+                                    "{\"data\": null, \"error\": \"Forbidden.\"}");
                         } else if (Pattern.matches("/decks", request.getPathname())) {
                             return getCardController().setDeck(request.getAuthToken(), request.getBody());
                         }
@@ -125,22 +136,24 @@ public class App implements ServerApp {
                             }
                             return new Response(HttpStatus.FORBIDDEN, ContentType.JSON,
                                     "{\"data\": null, \"error\": \"Forbidden.\"}");
-                        } else if (Pattern.matches("/battle", request.getPathname())) {
-                        /*        Thread.currentThread().getThreadGroup().list();
+                        } else if (Pattern.matches("/battles", request.getPathname())) {
 
-                                try {
-                                    Thread.currentThread().wait();
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }*/
-
-                        }
-                        //acquire packages
-                        if (Pattern.matches("/transactions/packages", request.getPathname())) {
-                            return packController.acquirePackage(request.getAuthToken());
+                           // return getBattleController().battle(request.getAuthToken());
+                        } else if (Pattern.matches("/transactions/packages", request.getPathname())) {
+                            //acquire packages
+                            return getPackController().acquirePackage(request.getAuthToken());
+                        } else if (Pattern.matches("/tradings/.*", request.getPathname())) {
+                            // accept trade deal with card
+                            return getTradingController().acceptDeal(request.getAuthToken(), request.getPathVar(), request.getBody());
+                        } else if (Pattern.matches("/tradings", request.getPathname())) {
+                            // create trading deal
+                            return getTradingController().createDeal(request.getAuthToken(), request.getBody());
                         }
                         break;
                     case DELETE:
+                        if (Pattern.matches("/tradings/.*", request.getPathname())) {
+                            return getTradingController().deleteDeal(request.getAuthToken(), request.getPathVar());
+                        }
                         break;
                     default:
                         break;

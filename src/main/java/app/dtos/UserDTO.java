@@ -1,5 +1,7 @@
 package app.dtos;
 
+import app.models.BattleLogEntry;
+import app.models.Card;
 import app.models.Deck;
 import app.models.Stack;
 import com.fasterxml.jackson.annotation.JsonAlias;
@@ -7,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 @Getter
@@ -17,14 +21,13 @@ public class UserDTO {
     UUID user_id;
     @JsonAlias({"username"})
     String username;
-    @JsonAlias({"password"})
-    String password;
-    @JsonAlias({"coins"})
-    int coins;
+    @JsonAlias({"score"})
+    int score;
     @JsonAlias({"stack"})
-    Stack stack;
+    HashMap<UUID, Card> stack;
     @JsonAlias({"deck"})
-    Deck deck;
-
+    HashMap<UUID, Card> deck;
+    @JsonAlias({"BattleLog"})
+    ArrayList<BattleLogEntry> battleLog;
     public UserDTO() {}
 }

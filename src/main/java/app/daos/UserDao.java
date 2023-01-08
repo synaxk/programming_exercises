@@ -53,7 +53,9 @@ public class UserDao implements Dao<User>{
                             result.getInt(4),
                             result.getInt(5),
                             result.getString(6),
-                            result.getString(7));
+                            result.getString(7),
+                            result.getInt(8),
+                            result.getInt(9));
             users.put(user.getUser_id(), user);
         }
         return users;
@@ -72,7 +74,9 @@ public class UserDao implements Dao<User>{
                     result.getInt(4),
                     result.getInt(5),
                     result.getString(6),
-                    result.getString(7));
+                    result.getString(7),
+                    result.getInt(8),
+                    result.getInt(9));
         }
         return null;
     }

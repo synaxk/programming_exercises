@@ -2,12 +2,14 @@
 
 CREATE DATABASE mtcg;
 \c mtcg;
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE Cards (
     card_id UUID NOT NULL DEFAULT uuid_generate_v4(),
     name VARCHAR (64) NOT NULL,
     damage INT NOT NULL, -- wird noch erweitert
+    cardType INT NOT NULL,
     PRIMARY KEY(card_id)
 );
 
@@ -20,6 +22,8 @@ CREATE TABLE Users (
     coins INT NOT NULL,
     bio VARCHAR(255) DEFAULT '',
     image VARCHAR(64) DEFAULT '',
+    wins INT,
+    losses INT,
     PRIMARY KEY(user_id)
 );
 
@@ -57,27 +61,13 @@ CREATE TABLE PackCards (
     CONSTRAINT fk_card FOREIGN KEY(card_id) REFERENCES cards(card_id)
 );
 
-CREATE TABLE Battle (
-    battle_id UUID NOT NULL DEFAULT uuid_generate_v4(),
-    user1_id UUID NOT NULL,
-    user2_id UUID NOT NULL,
-    winner_id UUID NOT NULL,
-    PRIMARY KEY (battle_id),
-    CONSTRAINT fk_user1 FOREIGN KEY(user1_id) REFERENCES users(user_id),
-    CONSTRAINT fk_user2 FOREIGN KEY(user2_id) REFERENCES users(user_id),
-    CONSTRAINT fk_winner FOREIGN KEY(winner_id) REFERENCES users(user_id)
-);
-
-CREATE TABLE BattleRound (
-    battleRound_id UUID NOT NULL DEFAULT uuid_generate_v4(),
-    battle_id UUID NOT NULL,
-    user1_id UUID NOT NULL,
-    user2_id UUID NOT NULL,
-    user1card_id UUID NOT NULL,
-    user2card_id UUID NOT NULL,
-    PRIMARY KEY (battleRound_id),
-    CONSTRAINT fk_user1 FOREIGN KEY(user1_id) REFERENCES Users(user_id),
-    CONSTRAINT fk_user2 FOREIGN KEY(user2_id) REFERENCES Users(user_id),
-    CONSTRAINT fk_user1card FOREIGN KEY(user1card_id) REFERENCES cards(card_id),
-    CONSTRAINT fk_user2card FOREIGN KEY(user2card_id) REFERENCES cards(card_id)
-);
+CREATE TABLE TradingDeals (
+    tradingDeal_id UUID NOT NULL DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL,
+    card_id UUID NOT NULL,
+    cardType int,
+    minDamage int,
+    PRIMARY KEY (tradingDeal_id),
+    CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES users(user_id),
+    CONSTRAINT fk_card FOREIGN KEY(card_id) REFERENCES cards(card_id)
+)

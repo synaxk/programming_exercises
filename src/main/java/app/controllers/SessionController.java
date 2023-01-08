@@ -32,11 +32,11 @@ public class SessionController extends Controller {
         if (req_user.getUsername().equals(user.getUsername()) &&
                 BCrypt.checkpw(req_user.getPassword(), user.getPassword())) {
             return new Response(HttpStatus.OK, ContentType.JSON,
-                    "{\"data\": " + this.generateToken(user) +
-                            ", \"error\": null }");
+                    "{\"data\": \"User login successful, Token: " + this.generateToken(user) +
+                            "\", \"error\": null }");
         }
         return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON,
-                "{\"data\": null, \"error\": \"Invalid Username or Password\"}");
+                "{\"data\": null, \"error\": \"Invalid username/password provided\"}");
     }
 
     public boolean verifyAuthToken(String authToken) {
@@ -47,7 +47,11 @@ public class SessionController extends Controller {
 
     public boolean authorize(String authToken, String user_id) {
         String username = authToken.replace("-mtcgToken","");
-        return getUserRepository().getUserByUID(user_id).getUsername().equals(username);
+        User user = getUserRepository().getUserByUID(user_id);
+        if (user != null && user.getUsername().equals(username)) {
+            return true;
+        }
+        return false;
     }
 
     private String generateToken (User user) {

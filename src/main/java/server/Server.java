@@ -30,11 +30,12 @@ public class Server {
 
     private void run() {
         int counter = 0;
+        ThreadGroup threads = new ThreadGroup("mtcg");
         while (true) {
             try {
                 setClientSocket(getServerSocket().accept());
                 RequestHandler task = new RequestHandler(this.clientSocket, this.app);
-                Thread thread = new Thread(task);
+                Thread thread = new Thread(threads, task);
                 thread.setName(String.valueOf(counter));
                 System.out.println("Thread: " + thread.getName());
                 ++counter;

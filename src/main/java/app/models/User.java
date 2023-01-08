@@ -28,6 +28,10 @@ public class User {
     @JsonAlias({"Image"})
     private String image;
 
+    @JsonAlias({"Wins"})
+    private int wins;
+    @JsonAlias({"Losses"})
+    private int losses;
     @JsonCreator
     public User(@JsonProperty("Username") String name, @JsonProperty("Password") String password) {
         this.username = name;

@@ -1,6 +1,9 @@
 package app.repositories;
 
+import app.daos.CardDao;
 import app.dtos.ScoreEntryDTO;
+import app.dtos.UserDTO;
+import app.models.Card;
 import app.models.User;
 import app.daos.UserDao;
 import lombok.AccessLevel;
@@ -8,16 +11,19 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Getter(AccessLevel.PRIVATE)
 @Setter(AccessLevel.PRIVATE)
 public class UserRepository {
     UserDao userDao;
+    CardDao cardDao;
     HashMap<UUID, User> userCache = new HashMap<>();
+
+    public UserRepository(UserDao userDao, CardDao cardDao) {
+        setUserDao(userDao);
+        setCardDao(cardDao);
+    }
 
     public UserRepository(UserDao userDao) {
         setUserDao(userDao);
@@ -47,7 +53,30 @@ public class UserRepository {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-     }
+    }
+
+    public User getUserByToken(String token) {
+        try {
+            String username = token.replace("-mtcgToken","");
+            return getUserDao().readByName(username);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public UserDTO getUserDTOByToken(String token) {
+        try {
+            String username = token.replace("-mtcgToken","");
+            User user = getUserDao().readByName(username);
+            HashMap<UUID, Card> stack = getCardDao().readStackCardsByUserID(
+                    user.getUser_id().toString());
+            HashMap<UUID, Card> deck = getCardDao().readDeckCardsByUserID(
+                    user.getUser_id().toString());
+            return new UserDTO(user.getUser_id(), user.getUsername(), user.getScore(), stack, deck, null);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public void createUser(User user) {
         try {
@@ -65,13 +94,20 @@ public class UserRepository {
         }
     }
 
+    public ScoreEntryDTO readScore(String token) {
+        User user = this.getUserByToken(token);
+        return new ScoreEntryDTO(user.getUser_id(), user.getUsername(), user.getScore(),
+                user.getWins(), user.getLosses());
+    }
+
     public ArrayList<ScoreEntryDTO> readScores() {
         try {
             ArrayList<User> users = this.getAll();
             ArrayList<ScoreEntryDTO> scores = new ArrayList<>();
 
             for (User user : users) {
-                ScoreEntryDTO score = new ScoreEntryDTO(user.getUser_id(), user.getUsername(), user.getScore());
+                ScoreEntryDTO score = new ScoreEntryDTO(user.getUser_id(), user.getUsername(),
+                        user.getScore(), user.getWins(), user.getLosses());
                 scores.add(score);
             }
             return scores;

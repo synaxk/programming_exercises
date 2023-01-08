@@ -100,6 +100,7 @@ echo;
 # Test 8: show all acquired cards kienboec
 echo -e "\033[1;32mTest 8: show all acquired cards kienboec\033[0m"
 curl -X GET http://localhost:7777/cards --header "Authorization: Basic kienboec-mtcgToken"
+echo;
 echo "should fail (no token)"
 curl -X GET http://localhost:7777/cards
 echo;
@@ -151,11 +152,11 @@ echo;
 # Test 13: show configured deck different representation
 echo -e "\033[1;32mTest 13: show configured deck different representation\033[0m"
 echo "kienboec"
-curl -X GET http://localhost:7777/decks?format=plain --header "Authorization: Basic kienboec-mtcgToken"
+curl -X GET "http://localhost:7777/decks?format=plain" --header "Authorization: Basic kienboec-mtcgToken"
 echo;
 echo;
 echo "altenhof"
-curl -X GET http://localhost:7777/decks?format=plain --header "Authorization: Basic altenhof-mtcgToken"
+curl -X GET "http://localhost:7777/decks?format=plain" --header "Authorization: Basic altenhof-mtcgToken"
 echo;
 echo;
 
@@ -203,8 +204,8 @@ echo;
 
 # Test 17: battle
 echo -e "\033[1;32mTest 17: battle\033[0m"
-curl -X POST http://localhost:7777/battles --header "Authorization: Basic kienboec-mtcgToken" &
-curl -X POST http://localhost:7777/battles --header "Authorization: Basic altenhof-mtcgToken" &
+curl -X POST http://localhost:7777/battles --header "Authorization: Basic kienboec-mtcgToken" -d ""&
+curl -X POST http://localhost:7777/battles --header "Authorization: Basic altenhof-mtcgToken" -d ""&
 wait
 echo;
 echo;
@@ -231,7 +232,7 @@ echo "check trading deals"
 curl -X GET http://localhost:7777/tradings --header "Authorization: Basic kienboec-mtcgToken"
 echo;
 echo "create trading deal"
-curl -X POST http://localhost:7777/tradings --header "Content-Type: application/json" --header "Authorization: Basic kienboec-mtcgToken" -d "{\"Id\": \"6cd85277-4590-49d4-b0cf-ba0a921faad0\", \"CardToTrade\": \"1cb6ab86-bdb2-47e5-b6e4-68c5ab389334\", \"Type\": \"monster\", \"MinimumDamage\": 15}"
+curl -X POST http://localhost:7777/tradings --header "Content-Type: application/json" --header "Authorization: Basic kienboec-mtcgToken" -d "{\"TradingDeal_id\": \"6cd85277-4590-49d4-b0cf-ba0a921faad0\", \"Card_id\": \"1cb6ab86-bdb2-47e5-b6e4-68c5ab389334\", \"CardType\": \"monster\", \"MinDamage\": 15}"
 echo;
 echo "check trading deals"
 curl -X GET http://localhost:7777/tradings --header "Authorization: Basic kienboec-mtcgToken"
@@ -247,7 +248,8 @@ echo;
 echo -e "\033[1;32mTest 21: check trading deals\033[0m"
 curl -X GET http://localhost:7777/tradings  --header "Authorization: Basic kienboec-mtcgToken"
 echo;
-curl -X POST http://localhost:7777/tradings --header "Content-Type: application/json" --header "Authorization: Basic kienboec-mtcgToken" -d "{\"Id\": \"6cd85277-4590-49d4-b0cf-ba0a921faad0\", \"CardToTrade\": \"1cb6ab86-bdb2-47e5-b6e4-68c5ab389334\", \"Type\": \"monster\", \"MinimumDamage\": 15}"
+curl -X POST http://localhost:7777/tradings --header "Content-Type: application/json" --header "Authorization: Basic kienboec-mtcgToken" -d "{\"TradingDeal_id\": \"6cd85277-4590-49d4-b0cf-ba0a921faad0\", \"Card_id\": \"1cb6ab86-bdb2-47e5-b6e4-68c5ab389334\", \"CardType\": \"monster\", \"MinDamage\": 15}"
+echo;
 echo "check trading deals"
 curl -X GET http://localhost:7777/tradings  --header "Authorization: Basic kienboec-mtcgToken"
 echo;
@@ -264,5 +266,4 @@ curl -X GET http://localhost:7777/tradings --header "Authorization: Basic kienbo
 echo;
 curl -X GET http://localhost:7777/tradings --header "Authorization: Basic altenhof-mtcgToken"
 echo;
-
 echo "end..."
