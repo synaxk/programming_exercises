@@ -1,6 +1,5 @@
 package app.daos;
 
-import app.controllers.Controller;
 import app.models.CardType;
 import app.models.TradingDeal;
 import lombok.AccessLevel;

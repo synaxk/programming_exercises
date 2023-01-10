@@ -40,5 +40,11 @@ public class User {
         this.score = 100;
     }
 
+    public User(UUID user_id,String name, String password) {
+        this.user_id = user_id;
+        this.username = name;
+        this.password = password;
+    }
+
 }
 

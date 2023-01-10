@@ -50,32 +50,13 @@ public class App implements ServerApp {
 
         setUserController(new UserController(new UserRepository(userDao)));
         setSessionController(new SessionController(new UserRepository(userDao)));
-        setPackController(new PackController(new PackRepository(packDao, cardDao),
-                                                new UserRepository(userDao)));
+        setPackController(new PackController(new PackRepository(packDao, cardDao), new UserRepository(userDao)));
         setCardController(new CardController(new CardRepository(cardDao, userDao)));
-        setBattleController(new BattleController(new UserRepository(userDao, cardDao),
-                                                new CardRepository(cardDao, userDao)));
-
+        setBattleController(new BattleController(new UserRepository(userDao, cardDao), new CardRepository(cardDao, userDao)));
         setTradingController(new TradingController(new TradingRepository(tradingDao, userDao, cardDao)));
     }
 
-    //routes
-    // users || POST
-    // users/USERNAME || GET, PUT
-    // sessions || POST
-    // packages || POST
-    // transactions
-    // transactions/packages || POST
-    // cards || GET
-    // decks, var format=plain || GET, PUT
-    // stats || GET
-    // battles || POST
-    // score || GET
-    // tradings || GET, POST
-    // tradings/TRADEID || DELETE || POST
-
-
-    public synchronized Response handleRequest(Request request) throws JsonProcessingException {
+    public Response handleRequest(Request request) throws JsonProcessingException {
 
         // only allow login and registration for requests without token
         if (request.getAuthToken().isEmpty()) {
@@ -137,8 +118,7 @@ public class App implements ServerApp {
                             return new Response(HttpStatus.FORBIDDEN, ContentType.JSON,
                                     "{\"data\": null, \"error\": \"Forbidden.\"}");
                         } else if (Pattern.matches("/battles", request.getPathname())) {
-
-                           // return getBattleController().battle(request.getAuthToken());
+                            return getBattleController().battle(request.getAuthToken());
                         } else if (Pattern.matches("/transactions/packages", request.getPathname())) {
                             //acquire packages
                             return getPackController().acquirePackage(request.getAuthToken());

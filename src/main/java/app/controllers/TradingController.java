@@ -1,6 +1,5 @@
 package app.controllers;
 
-import app.models.Card;
 import app.models.TradingDeal;
 import app.repositories.TradingRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,10 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import server.Response;
 
-import java.security.PublicKey;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.UUID;
 
 public class TradingController extends Controller{
 
@@ -52,10 +48,15 @@ public class TradingController extends Controller{
     public Response createDeal(String token, String body){
         try {
             TradingDeal trade = getObjectMapper().readValue(body, TradingDeal.class);
-            if (getTradingRepository().getTradingDeals().contains(trade)) {
-                return new Response(HttpStatus.ALREADY_EXISTS, ContentType.JSON,
-                        "{\"data\":\"\",\"error\":\"A deal with this deal ID already exists\"}");
+            ArrayList<TradingDeal> trades = getTradingRepository().getTradingDeals();
+
+            for (TradingDeal tr : trades) {
+                if (tr.getTradingDeal_id().equals(trade.getTradingDeal_id())) {
+                    return new Response(HttpStatus.ALREADY_EXISTS, ContentType.JSON,
+                            "{\"data\":\"\",\"error\":\"A deal with this deal ID already exists\"}");
+                }
             }
+
             if (!getTradingRepository().createTradingDeal(token, trade)) {
                 return new Response(HttpStatus.FORBIDDEN, ContentType.JSON,
                         "{ \"data\": \"The deal contains a card that is not owned by " +
@@ -63,7 +64,7 @@ public class TradingController extends Controller{
             }
             return new Response(HttpStatus.CREATED, ContentType.JSON,
                     "{ \"data\": \"Trading deal successfully created.\", \"error\": null }");
-        } catch (JsonProcessingException e){
+        } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
         return null;

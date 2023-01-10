@@ -1,10 +1,7 @@
 package app.controllers;
 
 import app.models.Card;
-import app.models.CardType;
-import app.models.User;
 import app.repositories.CardRepository;
-import app.repositories.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import http.ContentType;
 import http.HttpStatus;

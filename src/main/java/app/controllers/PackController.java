@@ -14,7 +14,6 @@ import lombok.Setter;
 import server.Response;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 @Setter(AccessLevel.PRIVATE)

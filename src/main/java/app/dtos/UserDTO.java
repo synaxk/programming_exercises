@@ -2,8 +2,6 @@ package app.dtos;
 
 import app.models.BattleLogEntry;
 import app.models.Card;
-import app.models.Deck;
-import app.models.Stack;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

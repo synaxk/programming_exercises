@@ -4,7 +4,6 @@ echo "CURL Testing for Monster Trading Cards Game"
 echo "-------------------------------------------"
 echo;
 
-# Test 1: Create Users (Registration)
 echo -e "\033[1;32mTest 1: Create Users (Registration)\033[0m"
 curl -X POST http://localhost:7777/users --header "Content-Type: application/json" -d "{\"User_id\":\"a05f1dee-2856-4552-b138-523d8004e5ec\", \"Username\":\"kienboec\", \"Password\":\"daniel\"}"
 echo;
@@ -20,7 +19,7 @@ curl -X POST http://localhost:7777/users --header "Content-Type: application/jso
 echo;
 echo;
 
-# Test 2: Login Users
+
 echo -e "\033[1;32mTest 2: Login Users\033[0m"
 curl -X POST http://localhost:7777/sessions --header "Content-Type: application/json" -d "{\"Username\":\"kienboec\", \"Password\":\"daniel\"}"
 echo;
@@ -34,7 +33,8 @@ curl -X POST http://localhost:7777/sessions --header "Content-Type: application/
 echo;
 echo;
 
-# Test 3: create packages (done by "admin")
+
+
 echo -e "\033[1;32mTest 3: create packages (done by \"admin\")\033[0m"
 curl -X POST http://localhost:7777/packages --header "Content-Type: application/json" --header "Authorization: Basic admin-mtcgToken" -d "[{\"Card_id\":\"845f0dc7-37d0-426e-994e-43fc3ac83c08\", \"Name\":\"WaterGoblin\", \"Damage\": 10.0}, {\"Card_id\":\"99f8f8dc-e25e-4a95-aa2c-782823f36e2a\", \"Name\":\"Dragon\", \"Damage\": 50.0}, {\"Card_id\":\"e85e3976-7c86-4d06-9a80-641c2019a79f\", \"Name\":\"WaterSpell\", \"Damage\": 20.0}, {\"Card_id\":\"1cb6ab86-bdb2-47e5-b6e4-68c5ab389334\", \"Name\":\"Ork\", \"Damage\": 45.0}, {\"Card_id\":\"dfdd758f-649c-40f9-ba3a-8657f4b3439f\", \"Name\":\"FireSpell\",    \"Damage\": 25.0}]"
 echo;
@@ -50,7 +50,8 @@ curl -X POST http://localhost:7777/packages --header "Content-Type: application/
 echo;
 echo;
 
-# Test 4: acquire packages kienboec
+
+
 echo -e "\033[1;32mTest 4: acquire packages kienboec\033[0m"
 curl -X POST http://localhost:7777/transactions/packages --header "Content-Type: application/json" --header "Authorization: Basic kienboec-mtcgToken" -d ""
 echo;
@@ -65,7 +66,8 @@ curl -X POST http://localhost:7777/transactions/packages --header "Content-Type:
 echo;
 echo;
 
-# Test 5: acquire packages altenhof
+
+
 echo -e "\033[1;32mTest 5: acquire packages altenhof\033[0m"
 curl -X POST http://localhost:7777/transactions/packages --header "Content-Type: application/json" --header "Authorization: Basic altenhof-mtcgToken" -d ""
 echo;
@@ -76,7 +78,8 @@ curl -X POST http://localhost:7777/transactions/packages --header "Content-Type:
 echo;
 echo;
 
-# Test 6: add new packages
+
+
 echo -e "\033[1;32mTest 6: add new packages\033[0m"
 curl -X POST http://localhost:7777/packages --header "Content-Type: application/json" --header "Authorization: Basic admin-mtcgToken" -d "[{\"Card_id\":\"67f9048f-99b8-4ae4-b866-d8008d00c53d\", \"Name\":\"WaterGoblin\", \"Damage\": 10.0}, {\"Card_id\":\"aa9999a0-734c-49c6-8f4a-651864b14e62\", \"Name\":\"RegularSpell\", \"Damage\": 50.0}, {\"Card_id\":\"d6e9c720-9b5a-40c7-a6b2-bc34752e3463\", \"Name\":\"Knight\", \"Damage\": 20.0}, {\"Card_id\":\"02a9c76e-b17d-427f-9240-2dd49b0d3bfd\", \"Name\":\"RegularSpell\", \"Damage\": 45.0}, {\"Card_id\":\"2508bf5c-20d7-43b4-8c77-bc677decadef\", \"Name\":\"FireElf\", \"Damage\": 25.0}]"
 echo;
@@ -86,7 +89,8 @@ curl -X POST http://localhost:7777/packages --header "Content-Type: application/
 echo;
 echo;
 
-# Test 7: acquire newly created packages altenhof
+
+
 echo -e "\033[1;32mTest 7: acquire newly created packages altenhof\033[0m"
 curl -X POST http://localhost:7777/transactions/packages --header "Content-Type: application/json" --header "Authorization: Basic altenhof-mtcgToken" -d ""
 echo;
@@ -97,7 +101,8 @@ curl -X POST http://localhost:7777/transactions/packages --header "Content-Type:
 echo;
 echo;
 
-# Test 8: show all acquired cards kienboec
+
+
 echo -e "\033[1;32mTest 8: show all acquired cards kienboec\033[0m"
 curl -X GET http://localhost:7777/cards --header "Authorization: Basic kienboec-mtcgToken"
 echo;
@@ -106,13 +111,15 @@ curl -X GET http://localhost:7777/cards
 echo;
 echo;
 
-# Test 9: show all acquired cards altenhof
+
+
 echo -e "\033[1;32mTest 9: show all acquired cards altenhof\033[0m"
 curl -X GET http://localhost:7777/cards --header "Authorization: Basic altenhof-mtcgToken"
 echo;
 echo;
 
-# Test 10: show unconfigured deck
+
+
 echo -e "\033[1;32mTest 10: show unconfigured deck\033[0m"
 curl -X GET http://localhost:7777/decks --header "Authorization: Basic kienboec-mtcgToken"
 echo;
@@ -120,7 +127,8 @@ curl -X GET http://localhost:7777/decks --header "Authorization: Basic altenhof-
 echo;
 echo;
 
-# Test 11: configure deck
+
+
 echo -e "\033[1;32mTest 11: configure deck\033[0m"
 curl -X PUT http://localhost:7777/decks --header "Content-Type: application/json" --header "Authorization: Basic kienboec-mtcgToken" -d "[\"845f0dc7-37d0-426e-994e-43fc3ac83c08\", \"99f8f8dc-e25e-4a95-aa2c-782823f36e2a\", \"e85e3976-7c86-4d06-9a80-641c2019a79f\", \"171f6076-4eb5-4a7d-b3f2-2d650cc3d237\"]"
 echo;
@@ -131,6 +139,7 @@ echo;
 curl -X GET http://localhost:7777/decks --header "Authorization: Basic altenhof-mtcgToken"
 echo;
 echo;
+
 echo "should fail and show original from before:"
 curl -X PUT http://localhost:7777/decks --header "Content-Type: application/json" --header "Authorization: Basic altenhof-mtcgToken" -d "[\"845f0dc7-37d0-426e-994e-43fc3ac83c08\", \"99f8f8dc-e25e-4a95-aa2c-782823f36e2a\", \"e85e3976-7c86-4d06-9a80-641c2019a79f\", \"171f6076-4eb5-4a7d-b3f2-2d650cc3d237\"]"
 echo;
@@ -141,7 +150,8 @@ echo "should fail ... only 3 cards set"
 curl -X PUT http://localhost:7777/decks --header "Content-Type: application/json" --header "Authorization: Basic altenhof-mtcgToken" -d "[\"aa9999a0-734c-49c6-8f4a-651864b14e62\", \"d6e9c720-9b5a-40c7-a6b2-bc34752e3463\", \"d60e23cf-2238-4d49-844f-c7589ee5342e\"]"
 echo;
 
-# Test 12: show configured deck
+
+
 echo -e "\033[1;32mTest 12: show configured deck\033[0m"
 curl -X GET http://localhost:7777/decks --header "Authorization: Basic kienboec-mtcgToken"
 echo;
@@ -160,7 +170,8 @@ curl -X GET "http://localhost:7777/decks?format=plain" --header "Authorization: 
 echo;
 echo;
 
-# Test 14: edit user data
+
+
 echo -e "\033[1;32mTest 14: edit user data\033[0m"
 curl -X GET http://localhost:7777/users/a05f1dee-2856-4552-b138-523d8004e5ec --header "Authorization: Basic kienboec-mtcgToken"
 echo;
@@ -188,7 +199,8 @@ curl -X GET http://localhost:7777/users/f52ad3c0-1103-4e14-99c7-98e8f29d4613 --h
 echo;
 echo;
 
-# Test 15: stats
+
+
 echo -e "\033[1;32mTest 15: stats\033[0m"
 curl -X GET http://localhost:7777/stats --header "Authorization: Basic kienboec-mtcgToken"
 echo;
@@ -196,13 +208,15 @@ curl -X GET http://localhost:7777/stats --header "Authorization: Basic altenhof-
 echo;
 echo;
 
-# Test 16: scoreboard
+
+
 echo -e "\033[1;32mTest 16: scoreboard\033[0m"
 curl -X GET http://localhost:7777/scores --header "Authorization: Basic kienboec-mtcgToken"
 echo;
 echo;
 
-# Test 17: battle
+
+
 echo -e "\033[1;32mTest 17: battle\033[0m"
 curl -X POST http://localhost:7777/battles --header "Authorization: Basic kienboec-mtcgToken" -d ""&
 curl -X POST http://localhost:7777/battles --header "Authorization: Basic altenhof-mtcgToken" -d ""&
@@ -210,7 +224,8 @@ wait
 echo;
 echo;
 
-# Test 18: Stats
+
+
 echo -e "\033[1;32mTest 18: Stats\033[0m"
 echo "kienboec"
 curl -X GET http://localhost:7777/stats --header "Authorization: Basic kienboec-mtcgToken"
@@ -220,13 +235,15 @@ curl -X GET http://localhost:7777/stats --header "Authorization: Basic altenhof-
 echo;
 echo;
 
-# Test 19: Scoreboard
+
+
 echo -e "\033[1;32mTest 19: Scoreboard\033[0m"
 curl -X GET http://localhost:7777/scores --header "Authorization: Basic kienboec-mtcgToken"
 echo;
 echo;
 
-# Test 20: trade
+
+
 echo -e "\033[1;32mTest 20: Trade\033[0m"
 echo "check trading deals"
 curl -X GET http://localhost:7777/tradings --header "Authorization: Basic kienboec-mtcgToken"
@@ -244,7 +261,8 @@ curl -X DELETE http://localhost:7777/tradings/6cd85277-4590-49d4-b0cf-ba0a921faa
 echo;
 echo;
 
-# Test 21: check trading deals
+
+
 echo -e "\033[1;32mTest 21: check trading deals\033[0m"
 curl -X GET http://localhost:7777/tradings  --header "Authorization: Basic kienboec-mtcgToken"
 echo;

@@ -13,7 +13,6 @@ import server.Response;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 
-import java.lang.reflect.Type;
 import java.util.*;
 
 public class UserController extends Controller {

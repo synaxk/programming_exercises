@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 
 @Getter
 @Setter
@@ -24,6 +25,7 @@ public class Battle {
     private int user1wins;
     private int user2wins;
     private CardRepository cardRepository;
+    public CountDownLatch battleLatch = new CountDownLatch(1);
 
     public Battle () {}
 
@@ -43,6 +45,14 @@ public class Battle {
         while ((user1.getDeck().size() > 1 && user2.getDeck().size() > 1) && this.rounds < 150) {
             this.battleRound(getRndCard(getUser1().getDeck()), getRndCard(getUser2().getDeck()));
         }
+        if (this.user1wins > this.user2wins) {
+
+        } else if (this.user1wins < this.user2wins) {
+
+        } else {
+            //draw
+        }
+       battleLatch.countDown();
     }
 
     private void battleRound(Card user1card, Card user2card) {
@@ -56,8 +66,8 @@ public class Battle {
             //add card to user1
             getUser1().getDeck().put(user2card.getCard_id(), user2card);
             //set battle log entries
-            log = new BattleLogEntry(this.rounds, user1.getUser_id(),user2.getUser_id(),
-                    user1card.getCard_id(),user2card.getCard_id(),1);
+            log = new BattleLogEntry(this.rounds, user1.getUser_id(), user2.getUser_id(),
+                    user1card.getCard_id(), user2card.getCard_id(), 1);
             getUser1().getBattleLog().add(log);
             getUser2().getBattleLog().add(log);
 
@@ -69,17 +79,19 @@ public class Battle {
             //add card to user2
             getUser2().getDeck().put(user1card.getCard_id(), user1card);
             //set battle log entries
-            log = new BattleLogEntry(this.rounds, user1.getUser_id(),user2.getUser_id(),
-                    user1card.getCard_id(),user2card.getCard_id(),2);
+            log = new BattleLogEntry(this.rounds, user1.getUser_id(), user2.getUser_id(),
+                    user1card.getCard_id(), user2card.getCard_id(), 2);
+            getUser1().getBattleLog().add(log);
+            getUser2().getBattleLog().add(log);
+
+        } else {
+            //else draw
+            log = new BattleLogEntry(this.rounds, user1.getUser_id(), user2.getUser_id(),
+                    user1card.getCard_id(), user2card.getCard_id(), 0);
             getUser1().getBattleLog().add(log);
             getUser2().getBattleLog().add(log);
 
         }
-        //else draw
-        log = new BattleLogEntry(this.rounds, user1.getUser_id(),user2.getUser_id(),
-                user1card.getCard_id(),user2card.getCard_id(),0);
-        getUser1().getBattleLog().add(log);
-        getUser2().getBattleLog().add(log);
     }
 
 

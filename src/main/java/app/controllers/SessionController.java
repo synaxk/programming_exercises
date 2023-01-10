@@ -2,7 +2,6 @@ package app.controllers;
 
 import app.models.User;
 import app.repositories.UserRepository;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import http.ContentType;
 import http.HttpStatus;
@@ -11,8 +10,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import server.Response;
-import server.Server;
-import java.util.UUID;
 
 public class SessionController extends Controller {
 
@@ -33,7 +30,7 @@ public class SessionController extends Controller {
                 BCrypt.checkpw(req_user.getPassword(), user.getPassword())) {
             return new Response(HttpStatus.OK, ContentType.JSON,
                     "{\"data\": \"User login successful, Token: " + this.generateToken(user) +
-                            "\", \"error\": null }");
+                            "\", \"error\": null}");
         }
         return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON,
                 "{\"data\": null, \"error\": \"Invalid username/password provided\"}");
