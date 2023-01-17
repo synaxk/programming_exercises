@@ -2,9 +2,7 @@ package app.controllers;
 
 import app.models.Card;
 import app.models.CardType;
-import app.models.User;
 import app.repositories.CardRepository;
-import app.repositories.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import http.ContentType;
 import http.HttpStatus;
@@ -12,11 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import server.Response;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;

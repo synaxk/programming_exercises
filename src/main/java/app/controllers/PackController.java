@@ -37,7 +37,6 @@ public class PackController extends Controller {
                     "{ \"data\": \"Package and cards successfully created.\", \"error\": null }"
             );
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
             return new Response(
                     HttpStatus.BAD_REQUEST,
                     ContentType.JSON,

@@ -71,7 +71,7 @@ public class CardDao implements Dao<Card> {
         stmt.setString(2, user_id);
         boolean res = stmt.execute();
         for (UUID deckCard : this.readDeckCardsByUserID(user_id).keySet()) {
-            if (deckCard == UUID.fromString(card_id)) {
+            if (deckCard.equals(UUID.fromString(card_id))) {
                 this.removeCardFromDeck(card_id, user_id);
             }
         }

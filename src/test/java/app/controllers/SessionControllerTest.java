@@ -1,6 +1,5 @@
 package app.controllers;
 
-import app.controllers.SessionController;
 import app.models.User;
 import app.repositories.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;

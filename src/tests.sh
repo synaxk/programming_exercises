@@ -219,6 +219,8 @@ echo;
 
 echo -e "\033[1;32mTest 17: battle\033[0m"
 curl -X POST http://localhost:7777/battles --header "Authorization: Basic kienboec-mtcgToken" -d ""&
+echo;
+echo;
 curl -X POST http://localhost:7777/battles --header "Authorization: Basic altenhof-mtcgToken" -d ""&
 wait
 echo;
@@ -284,4 +286,21 @@ curl -X GET http://localhost:7777/tradings --header "Authorization: Basic kienbo
 echo;
 curl -X GET http://localhost:7777/tradings --header "Authorization: Basic altenhof-mtcgToken"
 echo;
+
+
+echo -e "\033[1;32mTest 22: New Scoreboard\033[0m"
+curl -X GET http://localhost:7777/scores --header "Authorization: Basic kienboec-mtcgToken"
+echo;
+echo;
+
+echo -e "\033[1;32mTest 23: Feature - Change Password\033[0m"
+curl -X PUT http://localhost:7777/users/a05f1dee-2856-4552-b138-523d8004e5ec --header "Content-Type: application/json" --header "Authorization: Basic kienboec-mtcgToken" -d "{\"Username\": \"Kienboeck\",  \"Password\": \"NewPassword\"}"
+echo;
+
+echo -e "\033[1;32mTest 24: Login with new Password\033[0m"
+curl -X POST http://localhost:7777/sessions --header "Content-Type: application/json" -d "{\"Username\":\"kienboec\", \"Password\":\"NewPassword\"}"
+echo;
+
+
 echo "end..."
+

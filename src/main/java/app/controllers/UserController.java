@@ -95,7 +95,7 @@ public class UserController extends Controller {
                         }
                         continue;
                     }
-                    if (!ent.getValue().equals(props.get(ent.getKey()))) {
+                    if (ent.getValue() != null && !ent.getValue().equals(props.get(ent.getKey()))) {
                         props.replace(ent.getKey(), String.valueOf(ent.getValue()));
                     } else {
                         props.remove(ent.getKey());
@@ -139,3 +139,4 @@ public class UserController extends Controller {
                 "{ \"data\": " + scoreJson + ", \"error\": null }");
     }
 }
+

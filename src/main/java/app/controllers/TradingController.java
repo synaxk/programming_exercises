@@ -78,7 +78,7 @@ public class TradingController extends Controller{
                 return new Response(HttpStatus.OK, ContentType.JSON,
                         "{ \"data\": \"Trading deal successfully executed.\", \"error\": null }");
             }
-            return new Response(HttpStatus.OK, ContentType.JSON, "{\"data\":\"null\",\"error\":\"The offered " +
+            return new Response(HttpStatus.FORBIDDEN, ContentType.JSON, "{\"data\":\"null\",\"error\":\"The offered " +
                     "card is not owned by the user, or the requirements are not met (Type, MinimumDamage), " +
                     "or the offered card is locked in the deck, or the user tries to trade with self\"}");
 

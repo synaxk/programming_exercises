@@ -30,21 +30,22 @@ public class UserRepository {
     }
 
     public ArrayList<User> getAll() {
-        if (userCache.isEmpty()) {
             try {
-                setUserCache(getUserDao().read());
+                HashMap<UUID, User> users = getUserDao().read();
+                return new ArrayList<>(users.values());
+
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-        }
-        return new ArrayList<>(userCache.values());
+
     }
 
     public User getUserByUID(String uuid) {
-        if (userCache.isEmpty()) {
-            getAll();
+        try {
+            return getUserDao().readByID(uuid);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        return userCache.get(UUID.fromString(uuid));
     }
 
     public User getUserByName(String name) {

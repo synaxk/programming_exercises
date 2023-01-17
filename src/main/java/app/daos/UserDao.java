@@ -81,6 +81,25 @@ public class UserDao implements Dao<User>{
         return null;
     }
 
+    public User readByID(String user_id) throws SQLException {
+        String query = "SELECT * FROM users WHERE user_id=CAST(? AS UUID)";
+        PreparedStatement stmt = getConnection().prepareStatement(query);
+        stmt.setString(1, user_id);
+        ResultSet result = stmt.executeQuery();
+        if (result.next()) {
+            return new User(UUID.fromString(result.getString(1)),
+                    result.getString(2),
+                    result.getString(3),
+                    result.getInt(4),
+                    result.getInt(5),
+                    result.getString(6),
+                    result.getString(7),
+                    result.getInt(8),
+                    result.getInt(9));
+        }
+        return null;
+    }
+
     @Override
     public void update(String uuid, Map<String,String> props) throws SQLException {
         for (Map.Entry<String, String> ent : props.entrySet()) {

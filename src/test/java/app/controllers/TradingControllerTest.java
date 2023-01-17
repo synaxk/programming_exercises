@@ -2,23 +2,16 @@ package app.controllers;
 
 import app.models.CardType;
 import app.models.TradingDeal;
-import app.models.User;
 import app.repositories.TradingRepository;
-import app.repositories.UserRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import http.ContentType;
 import http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import server.Response;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -152,7 +145,40 @@ class TradingControllerTest {
     }
 
     @Test
+    @DisplayName("Accept Deal Success")
     void acceptDeal() {
+        //arrange
+        String body = "\"" + UUID.randomUUID() + "\"";
+        String trade_id = UUID.randomUUID().toString();
+        String token = "test-mtcgToken";
+        Response exp_response = new Response(HttpStatus.OK, ContentType.JSON,
+                "{ \"data\": \"Trading deal successfully executed.\", \"error\": null }");
+        Mockito.when(tradingRepository.acceptTradingDeal(any(), any(), any(String.class))).thenReturn(true);
+        //act
+        Response response = tradingController.acceptDeal(token, trade_id, body);
+        //assert
+        assertEquals(exp_response.getStatusCode(), response.getStatusCode());
+        assertEquals(exp_response.getContentType(), response.getContentType());
+        assertEquals(exp_response.getContent(), response.getContent());
+    }
+
+    @Test
+    @DisplayName("Accept Deal Fail")
+    void acceptFail() {
+        //arrange
+        String body = "\"" + UUID.randomUUID() + "\"";
+        String trade_id = UUID.randomUUID().toString();
+        String token = "test-mtcgToken";
+        Response exp_response = new Response(HttpStatus.FORBIDDEN, ContentType.JSON, "{\"data\":\"null\",\"error\":\"The offered " +
+                "card is not owned by the user, or the requirements are not met (Type, MinimumDamage), " +
+                "or the offered card is locked in the deck, or the user tries to trade with self\"}");
+        Mockito.when(tradingRepository.acceptTradingDeal(any(), any(), any(String.class))).thenReturn(false);
+        //act
+        Response response = tradingController.acceptDeal(token, trade_id, body);
+        //assert
+        assertEquals(exp_response.getStatusCode(), response.getStatusCode());
+        assertEquals(exp_response.getContentType(), response.getContentType());
+        assertEquals(exp_response.getContent(), response.getContent());
     }
 
     @Test
