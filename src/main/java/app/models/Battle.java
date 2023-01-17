@@ -116,6 +116,8 @@ public class Battle {
 
     private Card compareCards(Card user1card, Card user2card) {
         //Pure MonsterFight
+        int mod_dmg_1 = 0;
+        int mod_dmg_2 = 0;
         if (user1card.getCardType().getCategory().equals("Monster") &&
                 user2card.getCardType().getCategory().equals("Monster")) {
             //check for goblin / dragon -> dragon wins
@@ -149,37 +151,47 @@ public class Battle {
             // handle element effectiveness
             // water -> fire
             if (user1card.getCardType().getElement().equals("water") && user2card.getCardType().getElement().equals("fire")) {
-                user1card.setDamage(user1card.getDamage() * 2);
-                user2card.setDamage(user2card.getDamage() / 2);
+                mod_dmg_1 = user1card.getDamage() * 2;
+                mod_dmg_2 = user2card.getDamage() / 2;
             } else if (user1card.getCardType().getElement().equals("fire") && user2card.getCardType().getElement().equals("water")) {
-                user1card.setDamage(user1card.getDamage() / 2);
-                user2card.setDamage(user2card.getDamage() * 2);
+                mod_dmg_1 = user1card.getDamage() / 2;
+                mod_dmg_2 = user2card.getDamage() * 2;
 
             // fire -> normal
             } else if (user1card.getCardType().getElement().equals("fire") && user2card.getCardType().getElement().equals("normal")) {
-                user1card.setDamage(user1card.getDamage() * 2);
-                user2card.setDamage(user2card.getDamage() / 2);
+                mod_dmg_1 = user1card.getDamage() * 2;
+                mod_dmg_2 = user2card.getDamage() / 2;
             } else if (user1card.getCardType().getElement().equals("normal") && user2card.getCardType().getElement().equals("fire")) {
-                user1card.setDamage(user1card.getDamage() / 2);
-                user2card.setDamage(user2card.getDamage() * 2);
+                mod_dmg_1 = user1card.getDamage() / 2;
+                mod_dmg_2 = user2card.getDamage() * 2;
 
             // normal -> water
             } else if (user1card.getCardType().getElement().equals("normal") && user2card.getCardType().getElement().equals("water")) {
-                user1card.setDamage(user1card.getDamage() * 2);
-                user2card.setDamage(user2card.getDamage() / 2);
+                mod_dmg_1 = user1card.getDamage() * 2;
+                mod_dmg_2 = user2card.getDamage() / 2;
             } else if (user1card.getCardType().getElement().equals("water") && user2card.getCardType().getElement().equals("normal")) {
-                user1card.setDamage(user1card.getDamage() / 2);
-                user2card.setDamage(user2card.getDamage() * 2);
+                mod_dmg_1 = user1card.getDamage() / 2;
+                mod_dmg_2 = user2card.getDamage() * 2;
             }
         }
-        // compare card damage
-        if (user1card.getDamage() > user2card.getDamage()) {
-            return user1card;
-        } else if (user1card.getDamage() < user2card.getDamage()) {
-            return user2card;
+
+        if (mod_dmg_1 == 0 && mod_dmg_2 == 0) {
+            // compare card damage
+            if (user1card.getDamage() > user2card.getDamage()) {
+                return user1card;
+            } else if (user1card.getDamage() < user2card.getDamage()) {
+                return user2card;
+            }
+        } else {
+            if (mod_dmg_1 > mod_dmg_2) {
+                return user1card;
+            } else if (mod_dmg_1 < mod_dmg_2) {
+                return user2card;
+            }
         }
         return null;
     }
+
 
 
     private Card getRndCard(HashMap<UUID, Card> map) {
