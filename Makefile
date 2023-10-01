@@ -1,7 +1,7 @@
 all: myfind
 
-getopt: myfind.c
-	gcc -std=c99 -Wall -Werror -o myfind getopt.c
+myfind: myfind.c
+	gcc -std=c99 -Wall -Werror -o myfind myfind.c
 
 clean:
 	rm -f myfind
