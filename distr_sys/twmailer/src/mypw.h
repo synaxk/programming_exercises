@@ -1,0 +1,2 @@
+
+void getPassWord(char *passWordBuffer);

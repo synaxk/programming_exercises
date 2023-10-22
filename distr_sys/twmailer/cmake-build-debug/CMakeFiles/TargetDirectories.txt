@@ -1,0 +1,4 @@
+/home/alex/Documents/FHTW/03_Semester/VERTS/TWMailer/cmake-build-debug/CMakeFiles/client.dir
+/home/alex/Documents/FHTW/03_Semester/VERTS/TWMailer/cmake-build-debug/CMakeFiles/server.dir
+/home/alex/Documents/FHTW/03_Semester/VERTS/TWMailer/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/alex/Documents/FHTW/03_Semester/VERTS/TWMailer/cmake-build-debug/CMakeFiles/rebuild_cache.dir
