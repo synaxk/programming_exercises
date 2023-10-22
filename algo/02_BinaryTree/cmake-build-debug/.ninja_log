@@ -1,0 +1,25 @@
+# ninja log v5
+1	294	1649260133694567470	CMakeFiles/UE_2.dir/src/InputHandler.cpp.o	84456a86cdc5e1cc
+360	436	1649261476337462637	UE_2	8fd9a3a528691ae6
+0	360	1649261476261465889	CMakeFiles/UE_2.dir/main.cpp.o	dbdd2d0a8d603411
+1	303	1650733006433975431	CMakeFiles/treecheck.dir/src/ArgumentHandler.cpp.o	906e88d95b7d816d
+1	289	1650733006421975323	CMakeFiles/treecheck.dir/src/BinaryTree.cpp.o	160031d1a2d0d5ab
+0	20	1650553304384867802	build.ninja	f83337e88577a474
+0	96	1649259528469319716	CMakeFiles/UE_2.dir/src/BinaryTree.cpp.o	9f3345b547212595
+539	632	1650808548972682934	treecheck	a5b766cdfc80df71
+1	331	1649261476233467086	CMakeFiles/UE_2.dir/src/argumentHandler.cpp.o	27443ac9aa0729b1
+0	539	1650808548880681042	CMakeFiles/treecheck.dir/main.cpp.o	c42f591de174bff8
+0	315	1650808719063708281	CMakeFiles/treecheck.dir/main.cpp.o	c42f591de174bff8
+315	391	1650808719139709497	treecheck	a5b766cdfc80df71
+1	357	1650808734507954148	CMakeFiles/treecheck.dir/main.cpp.o	c42f591de174bff8
+357	438	1650808734587955415	treecheck	a5b766cdfc80df71
+1	363	1650808771460532127	CMakeFiles/treecheck.dir/main.cpp.o	c42f591de174bff8
+363	451	1650808771544533427	treecheck	a5b766cdfc80df71
+1	359	1650816269547081908	CMakeFiles/treecheck.dir/main.cpp.o	c42f591de174bff8
+359	441	1650816269631085067	treecheck	a5b766cdfc80df71
+1	307	1650816825326286831	CMakeFiles/treecheck.dir/src/BinaryTree.cpp.o	160031d1a2d0d5ab
+1	362	1650816825378287881	CMakeFiles/treecheck.dir/main.cpp.o	c42f591de174bff8
+362	438	1650816825454289415	treecheck	a5b766cdfc80df71
+1	517	1651085426337784447	CMakeFiles/treecheck.dir/main.cpp.o	c42f591de174bff8
+0	308	1651085533014724087	CMakeFiles/treecheck.dir/src/BinaryTree.cpp.o	160031d1a2d0d5ab
+309	418	1651085533126725072	treecheck	a5b766cdfc80df71
