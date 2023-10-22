@@ -1,0 +1,16 @@
+# ninja log v5
+240	323	1646918102224926741	02_Oasencrawler_OOP	a5a241004d83dc03
+1	257	1646917425352275307	CMakeFiles/02_Oasencrawler_OOP.dir/src/World.cpp.o	2cfe751b0fa2cf8d
+2	232	1646916175750671385	CMakeFiles/02_Oasencrawler_OOP.dir/src/Enemy.cpp.o	654bec65920e595
+1	364	1646907948426643328	CMakeFiles/02_Oasencrawler_OOP.dir/src/Player.cpp.o	6f49a3bdaa27158
+0	24	1646818999763842438	CMakeFiles/02_Oasencrawler_OOP.dir/src/Test.cpp.o	732884f1fa23a36c
+0	24	1647009367096573174	build.ninja	9bbc9b5f01362f1c
+1	11	1646144781102040748	CMakeFiles/02_Oasencrawler_OOP.dir/src/Grid.cpp.o	620184ae0e7f79a5
+0	218	1646918060173053689	CMakeFiles/02_Oasencrawler_OOP.dir/main.cpp.o	31505569b65a1301
+0	3	0	clean	be70312fd391e665
+1	264	1646518517839694543	CMakeFiles/02_Oasencrawler_OOP.dir/src/TerminalHandler.cpp.o	54a43d5d321f32f8
+2	302	1646911320273598210	CMakeFiles/02_Oasencrawler_OOP.dir/src/Bullet.cpp.o	53a4c1ab968f7939
+1	214	1646818125449903077	CMakeFiles/02_Oasencrawler_OOP.dir/src/Field.cpp.o	554caba6d73cd9a0
+1	240	1646918102144926874	CMakeFiles/02_Oasencrawler_OOP.dir/src/TestHandler.cpp.o	138540183ff57798
+2	36	1646517637146551748	CMakeFiles/02_Oasencrawler_OOP.dir/src/Log.cpp.o	183ce98beb5e850f
+1	228	1646666654085610541	CMakeFiles/02_Oasencrawler_OOP.dir/src/InputHandler.cpp.o	1e61d39e43f6084d

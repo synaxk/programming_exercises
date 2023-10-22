@@ -1,0 +1,6 @@
+# ninja log v5
+4309	4328	1652701258690848531	lib/libgmock.a	5fbeeac72960fdfb
+4248	4309	1652701258670848376	lib/libgtest.a	a6b49771c2c5f3b6
+0	75	1652703736149091891	build.ninja	717af473a664282e
+1	4248	1652701258602847847	lib/googletest/googletest/CMakeFiles/gtest.dir/src/gtest-all.cc.o	3ff64c30b8b6b53a
+1	2392	1652701256750833555	lib/googletest/googlemock/CMakeFiles/gmock.dir/src/gmock-all.cc.o	9f6830ef91f723d

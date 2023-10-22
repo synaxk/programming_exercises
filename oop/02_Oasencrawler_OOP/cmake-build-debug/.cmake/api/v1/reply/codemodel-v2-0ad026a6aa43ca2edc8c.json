@@ -1,0 +1,60 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.21"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "02_Oasencrawler_OOP",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "02_Oasencrawler_OOP::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-02_Oasencrawler_OOP-Debug-52a673e500250a3858e9.json",
+					"name" : "02_Oasencrawler_OOP",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/alex/Documents/FHTW/02_Semester/PROGR/Exercises/02_Oasencrawler_OOP/cmake-build-debug",
+		"source" : "/home/alex/Documents/FHTW/02_Semester/PROGR/Exercises/02_Oasencrawler_OOP"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

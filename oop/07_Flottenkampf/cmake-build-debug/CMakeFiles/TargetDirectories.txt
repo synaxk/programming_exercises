@@ -1,0 +1,3 @@
+/Users/alex/Documents/FHTW/02_Semester/PROGR/Exercises/07_Flottenkampf/Flottenkampf/cmake-build-debug/CMakeFiles/Flottenkampf.dir
+/Users/alex/Documents/FHTW/02_Semester/PROGR/Exercises/07_Flottenkampf/Flottenkampf/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/alex/Documents/FHTW/02_Semester/PROGR/Exercises/07_Flottenkampf/Flottenkampf/cmake-build-debug/CMakeFiles/rebuild_cache.dir

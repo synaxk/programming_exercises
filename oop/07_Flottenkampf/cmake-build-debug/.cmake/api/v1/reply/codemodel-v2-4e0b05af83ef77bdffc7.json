@@ -1,0 +1,60 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.22"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "Flottenkampf",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "Flottenkampf::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Flottenkampf-Debug-c8d37fab4525c1d03533.json",
+					"name" : "Flottenkampf",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/Users/alex/Documents/FHTW/02_Semester/PROGR/Exercises/07_Flottenkampf/Flottenkampf/cmake-build-debug",
+		"source" : "/Users/alex/Documents/FHTW/02_Semester/PROGR/Exercises/07_Flottenkampf/Flottenkampf"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 5
+	}
+}

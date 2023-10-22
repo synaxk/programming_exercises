@@ -1,0 +1,17 @@
+/home/alex/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5080.224/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/alex/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5080.224/bin/ninja/linux/ninja -G Ninja -S /home/alex/Documents/FHTW/02_Semester/PROGR/Exercises/06_DeepMiner/deep_miner_tests -B /home/alex/Documents/FHTW/02_Semester/PROGR/Exercises/06_DeepMiner/deep_miner_tests/cmake-build-debug
+CMake Warning (dev) at CMakeLists.txt:1 (project):
+  Policy CMP0048 is not set: project() command manages VERSION variables.
+  Run "cmake --help-policy CMP0048" for policy details.  Use the cmake_policy
+  command to set the policy and suppress this warning.
+
+  The following variable(s) would be set to empty:
+
+    CMAKE_PROJECT_VERSION
+    CMAKE_PROJECT_VERSION_MAJOR
+    CMAKE_PROJECT_VERSION_MINOR
+    CMAKE_PROJECT_VERSION_PATCH
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/alex/Documents/FHTW/02_Semester/PROGR/Exercises/06_DeepMiner/deep_miner_tests/cmake-build-debug

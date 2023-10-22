@@ -1,0 +1,10 @@
+# ninja log v5
+1	703	1652356227343654785	CMakeFiles/04_DeepMiner.dir/src/Bot.cpp.o	7bc2d232c3cc22e4
+1	391	1652356771472626699	CMakeFiles/04_DeepMiner.dir/src/Block.cpp.o	c9763ac4ce3af200
+1	74	1652695321274992708	build.ninja	fc85cf5985f5a81d
+2	729	1652356158211135652	CMakeFiles/04_DeepMiner.dir/src/GreedyBot.cpp.o	31e2862232e37861
+1	584	1652356651691559146	CMakeFiles/04_DeepMiner.dir/src/GameHandler.cpp.o	765fe013fb89c45a
+467	547	1652686107417698349	04_DeepMiner	99b9eaaf60897f66
+1	578	1652356799368871219	CMakeFiles/04_DeepMiner.dir/src/SortBot.cpp.o	1a384d8be47c5b57
+2	612	1652356227251654092	CMakeFiles/04_DeepMiner.dir/src/SearchBot.cpp.o	d1ee976dc81e0304
+1	467	1652686107341697360	CMakeFiles/04_DeepMiner.dir/main.cpp.o	a404e7decaa8d1c0

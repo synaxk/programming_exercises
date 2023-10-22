@@ -1,0 +1,4 @@
+/home/alex/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/213.6777.58/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/alex/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/213.6777.58/bin/ninja/linux/ninja -G Ninja /home/alex/Documents/FHTW/02_Semester/PROGR/Exercises/02_Oasencrawler_OOP
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/alex/Documents/FHTW/02_Semester/PROGR/Exercises/02_Oasencrawler_OOP/cmake-build-debug

@@ -1,0 +1,10 @@
+# ninja log v5
+1	275	1648670684433376437	CMakeFiles/03_FightClub.dir/main.cpp.o	e5f61dfa764bcc
+1	286	1648670775894083337	CMakeFiles/03_FightClub.dir/src/Fight.cpp.o	a1dea75a7dd7e442
+0	26	1648725150148531348	build.ninja	e2500afad78dc3b2
+1	414	1648666255227346257	CMakeFiles/03_FightClub.dir/src/Ability.cpp.o	cc61c906ea5cf9a9
+1	323	1648670411247256256	CMakeFiles/03_FightClub.dir/src/OrcFighter.cpp.o	e6a880a47219ccab
+0	321	1648670411239256192	CMakeFiles/03_FightClub.dir/src/Fighter.cpp.o	77dfa00919264db6
+2	398	1648670411323256848	CMakeFiles/03_FightClub.dir/src/Human.cpp.o	88db0a3b645be298
+1	318	1648670684481376808	CMakeFiles/03_FightClub.dir/src/GameHandler.cpp.o	a4b31fa2bd449e30
+286	372	1648670775978083986	03_FightClub	1f55e2a03af415e1
