@@ -1,0 +1,138 @@
+@startuml
+
+Card --|> MonsterCard
+Card --|> SpellCard
+
+CardCollection --|> Deck
+CardCollection --|> Stack
+CardCollection --|> Package
+
+
+Package o-- Card
+Stack o-- Card
+Deck o-- Card
+
+User o-- Stack
+User o-- Deck
+
+UserHandler --- User
+
+Battle *-- User
+ 
+class User {
+    int user_id,
+    string name,
+    string email,
+    string password,
+    int coins,
+    Stack stack,
+    Deck deck,
+
+    ..Methods..
+    +User(name, email, password)
+    setName()
+    setEmail()
+    setPassword()
+    setCoins()
+
+    getUser_id()
+    getName()
+    getEmail()
+    getCoins()
+}
+
+abstract class CardCollection {
+    ArrayList cards,
+    ..Methods..
+    addCard(Card);
+    removeCard(Card);
+}
+class Stack {
+    int stack_id,
+    ArrayList cards,
+}
+
+class Deck {
+    int deck_id,
+    string name,
+    Card[4] cards,
+
+    ..Methods..
+    getName()
+    setName()
+    getRandomCard()
+    addCard()
+    removeCard()
+}
+
+abstract class Card {
+    int card_id,
+    string name,
+}
+
+class MonsterCard {
+}
+
+class SpellCard {
+
+}
+
+class Package {
+    int package_id,
+    int price
+}
+
+abstract class CardTransaction {
+    User from,
+    user to,
+    Card card,
+}
+
+class Trade {
+
+}
+
+class Battle {
+    int battle_id,
+    User user1,
+    User user2,
+
+    ..Methods..
+    changeELO()
+
+}
+
+class Fight {
+    //Card vs Card
+
+}
+
+class DataHandler {
+    SQLConnection connection,
+    insert(string table, string where)
+    read(string table, string where)
+    update(string table, string where)
+    delete(string table, string where)
+}
+
+class UserHandler {
+    private UserHandler()
+    getUserByToken()
+    getUserById()
+    getUsers()
+    public static create()
+    public static update()
+    public static login()
+}
+
+class RequestHandler {
+
+}
+
+class Game {
+    DataHandler dh,
+    RequestHandler rh,
+
+}
+
+@enduml
