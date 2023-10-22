@@ -1,0 +1,13 @@
+p {
+  margin: 0;
+  padding: 0;
+}
+
+.col-sm-9 {
+  margin: 0;
+  padding: 0;
+}
+
+p.greyline {
+  background-color:#F0F0F0;
+}

@@ -1,0 +1,18 @@
+.todo {
+    margin-top: 70px;
+    text-align: center;
+    border-style: solid;
+    border-top: none;
+    border-bottom: none;
+    border-color: #2d2c2c;
+    font-size: larger;
+}
+
+.todo > li {
+    margin: 5px;
+    background-color: lightgray;
+}
+
+button {
+    margin-top: 4px;
+}

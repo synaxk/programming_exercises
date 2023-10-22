@@ -1,0 +1,27 @@
+[
+    {
+      "name": "Arduino UNO",
+      "detail": "A microcontroller board based on the ATmega328",
+      "price": "20.46"
+    },
+    {
+      "name": "Arduino Nano",
+      "detail": "A small microcontroller board based on the ATmega328",
+      "price": "17.03"
+    },
+    {
+      "name": "Arduino Leonardo",
+      "detail": "A microcontroller board based on the ATmega32u4",
+      "price": "12.10"
+    },
+    {
+      "name": "Raspberry Pi 3 Model B+",
+      "detail": "A single-board computer from the UK with 1GB RAM",
+      "price": "35.28"
+    },
+    {
+      "name": "Raspberry Pi Zero",
+      "detail": "A small single-board computer from the UK with 512MB RAM",
+      "price": "12.00"
+    }
+]
